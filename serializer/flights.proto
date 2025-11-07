@@ -1,0 +1,60 @@
+syntax = "proto3";
+package googleflightsearch;
+
+// Represents the class of service on a flight.
+enum CabinClass {
+  CABIN_CLASS_UNSPECIFIED = 0;
+  CABIN_CLASS_ECONOMY = 1;
+  CABIN_CLASS_PREMIUM_ECONOMY = 2;
+  CABIN_CLASS_BUSINESS = 3;
+  CABIN_CLASS_FIRST = 4;
+}
+
+// Represents the travel type or itinerary pattern.
+enum TripType {
+  TRIP_TYPE_UNSPECIFIED = 0;
+  TRIP_TYPE_ROUND = 1;
+  TRIP_TYPE_ONE_WAY = 2;
+  TRIP_TYPE_MULTI_CITY = 3; // Reserved for future use.
+}
+
+// Passenger categories by age or seat requirement.
+enum PassengerType {
+  PASSENGER_TYPE_UNSPECIFIED = 0;
+  PASSENGER_TYPE_ADULT = 1;
+  PASSENGER_TYPE_CHILD = 2;
+  PASSENGER_TYPE_INFANT_SEAT = 3;
+  PASSENGER_TYPE_INFANT_LAP = 4;
+}
+
+// Represents an airport by IATA/ICAO code.
+message AirportInfo {
+  string code = 2; // e.g., "YVR"
+}
+
+// Represents a specific flight segment.
+message FlightSegment {
+  string origin_airport = 1;
+  string departure_date = 2;  // ISO date (yyyy-MM-dd)
+  string destination_airport = 3;
+  string airline_code = 5;  // Airline IATA code, e.g., "UA"
+  string flight_number = 6;      // e.g., "2322"
+}
+
+// Represents one direction of a trip, with one or multiple connecting segments.
+message TripLeg {
+  string travel_date = 2;  // Top-level date for this leg
+  repeated FlightSegment segments = 4;  // Flight chain for this leg
+  AirportInfo origin = 13;
+  AirportInfo destination = 14;
+  optional int32 max_connections = 5;
+  repeated string preferred_airlines = 6;
+}
+
+// Represents the complete search request input.
+message FlightSearchRequest {
+  repeated TripLeg itinerary = 3;  // One leg for one-way, two for round-trip, etc.
+  CabinClass cabin_class = 9;
+  repeated PassengerType passenger_types = 8;
+  TripType trip_type = 19;
+}
