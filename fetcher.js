@@ -9,7 +9,7 @@ import fs from 'fs'
  * @param {boolean} [options.debug=false] - Show browser window if true.
  * @returns {Promise<{url:string, html:string, flightData:any}>}
  */
-export async function runSearchFetcher (urlObj, options = {}) {
+export async function runFetcher (urlObj, options = {}) {
   if (!(urlObj instanceof URL)) {
     throw new TypeError('runFetcher expects a URL object.')
   }
@@ -35,7 +35,7 @@ export async function runSearchFetcher (urlObj, options = {}) {
 
         const onResponse = async response => {
           const url = response.url()
-          if (url.includes('GetShoppingResults')) {
+          if (url.includes('GetShoppingResults') || url.includes('GetBookingResults')) {
             try {
               const json = await response.json()
               page.off('response', onResponse)
@@ -55,7 +55,7 @@ export async function runSearchFetcher (urlObj, options = {}) {
             clearInterval(timer)
             reject(
               new Error(
-                'Timeout waiting for GetShoppingResults XHR to complete'
+                'Timeout waiting for GetShoppingResults or GetBookingResults XHR to complete'
               )
             )
           }
@@ -86,7 +86,7 @@ export async function runSearchFetcher (urlObj, options = {}) {
       'https://www.google.com/travel/flights/search?tfs=CBwQAho-EgoyMDI1LTEyLTA1Ih4KA1lWUhIKMjAyNS0xMi0wNRoDTlJUKgJaRzICMjFqBwgBEgNZVlJyBwgBEgNOUlQaPhIKMjAyNS0xMi0xMiIeCgNOUlQSCjIwMjUtMTItMTIaA1lWUioCWkcyAjIyagcIARIDTlJUcgcIARIDWVZSQAFIAXABggELCP___________wGYAQE'
     )
 
-    const fetched = await runBookingFetcher(url, { debug: false })
+    const fetched = await runFetcher(url, { debug: false })
     console.log('Fetched page URL:', fetched.url)
     console.log('HTML saved to output.html')
   } catch (err) {
