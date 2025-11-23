@@ -1,8 +1,8 @@
 import { Actor } from "apify";
 import { spawn } from "child_process";
-import { runFetcher } from "./fetcher.js";
-import { parseBookingFlights, parseSearchFlights } from "./parser.js";
-import { generatGoogleFlightsURL } from "./url_generator.js";
+import { runFetcher } from "./fetcher.js"; // Path updated for src directory
+import { parseBookingFlights, parseSearchFlights } from "./parser.js"; // Path updated for src directory
+import { generatGoogleFlightsURL } from "./url_generator.js"; // Path updated for src directory
 
 await Actor.init();
 
@@ -11,7 +11,7 @@ const { type, debug, ...serializerInput } = input;
 
 // 1️⃣ Get tfs from Python serializer
 console.log("Calling Python serializer...");
-const pythonProcess = spawn("python3", ["serializer/flight_serializer.py"]);
+const pythonProcess = spawn("python3", ["src/serializer/flight_serializer.py"]); // Path updated for src directory
 
 let tfsUrl;
 const pythonPromise = new Promise((resolve, reject) => {
