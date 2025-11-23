@@ -6,24 +6,49 @@ import { generatGoogleFlightsURL } from "./url_generator.js"; // Path updated fo
 
 await Actor.init();
 
-const input = await Actor.getInput();
-const { type, debug, ...serializerInput } = input;
+const rawInput = await Actor.getInput();
+const { type, debug, ...userInput } = rawInput;
 
-// 1️⃣ Get tfs from Python serializer
-console.log("Calling Python serializer...");
-const pythonProcess = spawn("python3", ["src/serializer/flight_serializer.py"]); // Path updated for src directory
+// 1️⃣ Normalize the user input by calling the Python normalizer script
+console.log("Calling Python input normalizer...");
+const normalizerProcess = spawn("python3", ["src/input_normalizer/input_normalize.py"]);
 
-let tfsUrl;
-const pythonPromise = new Promise((resolve, reject) => {
+let normalizedInputJson;
+const normalizerPromise = new Promise((resolve, reject) => {
   let stdout = "";
   let stderr = "";
-  pythonProcess.stdout.on("data", (data) => (stdout += data.toString()));
-  pythonProcess.stderr.on("data", (data) => (stderr += data.toString()));
-  pythonProcess.on("close", (code) => {
+  normalizerProcess.stdout.on("data", (data) => (stdout += data.toString()));
+  normalizerProcess.stderr.on("data", (data) => (stderr += data.toString()));
+  normalizerProcess.on("close", (code) => {
     if (code !== 0) {
       return reject(
         new Error(`Python script exited with code ${code}: ${stderr}`)
       );
+    }
+    normalizedInputJson = stdout.trim();
+    resolve();
+  });
+});
+
+normalizerProcess.stdin.write(JSON.stringify(userInput));
+normalizerProcess.stdin.end();
+
+await normalizerPromise;
+console.log("Received normalized input from Python.");
+
+// 2️⃣ Get tfs from Python serializer using the normalized input
+console.log("Calling Python serializer...");
+const serializerProcess = spawn("python3", ["src/serializer/flight_serializer.py"]); // Path updated for src directory
+
+let tfsUrl;
+const serializerPromise = new Promise((resolve, reject) => {
+  let stdout = "";
+  let stderr = "";
+  serializerProcess.stdout.on("data", (data) => (stdout += data.toString()));
+  serializerProcess.stderr.on("data", (data) => (stderr += data.toString()));
+  serializerProcess.on("close", (code) => {
+    if (code !== 0) {
+      return reject(new Error(`Python script exited with code ${code}: ${stderr}`));
     }
     tfsUrl = stdout.trim();
     resolve();
@@ -32,19 +57,22 @@ const pythonPromise = new Promise((resolve, reject) => {
 
 pythonProcess.stdin.write(JSON.stringify(serializerInput));
 pythonProcess.stdin.end();
+const serializerInput = JSON.parse(normalizedInputJson);
+serializerProcess.stdin.write(JSON.stringify({ ...serializerInput, type, debug }));
+serializerProcess.stdin.end();
 
-await pythonPromise;
+await serializerPromise;
 console.log(`Received tfs from Python: ${tfsUrl}`);
 
-// 2️⃣ Generate URL and fetch page
+// 3️⃣ Generate URL and fetch page
 const googleFlightsUrl = await generatGoogleFlightsURL(tfsUrl, { type });
 const fetched = await runFetcher(googleFlightsUrl, { debug });
 
-// 3️⃣ Parse results
+// 4️⃣ Parse results
 const parser = type === "booking" ? parseBookingFlights : parseSearchFlights;
 const parsed = parser(fetched.html);
 
-// 4️⃣ Store results
+// 5️⃣ Store results
 await Actor.pushData(parsed);
 
 await Actor.exit();

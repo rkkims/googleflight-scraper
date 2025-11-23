@@ -108,21 +108,10 @@ def normalize_input(raw: Dict[str, Any]) -> Dict[str, Any]:
 
 # --- Inline testing block ---
 if __name__ == "__main__":
-    sample_input = {
-        "origin": "YVR",
-        "destination": "NRT",
-        "departure_date": "2025-12-03",
-        "return_date": "2025-12-10",
-        "fixed_flights": {
-            "outbound": [
-                {"origin_airport": "YVR", "destination_airport": "HKG", "date": "2025-12-03", "airline_code": "HX", "flight_number": "81"},
-                {"origin_airport": "HKG", "destination_airport": "NRT", "date": "2025-12-04", "airline_code": "HX", "flight_number": "604"},
-            ]
-        },
-        "passengers": {"adult": 2, "child": 1, "infant": 0},
-        "seat": "economy",
-    }
-
-    normalized = normalize_input(sample_input)
-    from pprint import pprint
-    pprint(normalized)
+    import sys
+    import json
+    
+    input_json = sys.stdin.read()
+    input_data = json.loads(input_json)
+    normalized_data = normalize_input(input_data)
+    print(json.dumps(normalized_data))
