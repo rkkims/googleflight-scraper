@@ -111,17 +111,19 @@ export async function runFetcher(urlObj, options = {}) {
 }
 
 // --- Test run ---
-(async () => {
-  try {
-    // Example URL (replace with booking or search as needed)
-    const url = new URL(
-      "https://www.google.com/travel/flights/booking?tfs=CBwQAhqCARIKMjAyNS0xMi0xMSIfCgNZVlISCjIwMjUtMTItMTEaA1NGTyoCQUMyAzU2NCIfCgNTRk8SCjIwMjUtMTItMTEaA0RPSCoCUVIyAzczOCIgCgNET0gSCjIwMjUtMTItMTIaA1NISioCUVIyBDEwNThqBwgBEgNZVlJyBwgBEgNTSEoaggESCjIwMjUtMTItMTgiIAoDU0hKEgoyMDI1LTEyLTE4GgNET0gqAlFSMgQxMDYxIh8KA0RPSBIKMjAyNS0xMi0xOBoDWVlaKgJRUjIDNzY3Ih8KA1lZWhIKMjAyNS0xMi0xOBoDWVZSKgJXUzIDNzM3agcIARIDU0hKcgcIARIDWVZSQAFIAXABggELCP___________wGYAQE"
-    );
+if (process.argv[1].endsWith("fetcher.js")) {
+  (async () => {
+    try {
+      // Example URL (replace with booking or search as needed)
+      const url = new URL(
+        "https://www.google.com/travel/flights/booking?tfs=CBwQAhqCARIKMjAyNS0xMi0xMSIfCgNZVlISCjIwMjUtMTItMTEaA1NGTyoCQUMyAzU2NCIfCgNTRk8SCjIwMjUtMTItMTEaA0RPSCoCUVIyAzczOCIgCgNET0gSCjIwMjUtMTItMTIaA1NISioCUVIyBDEwNThqBwgBEgNZVlJyBwgBEgNTSEoaggESCjIwMjUtMTItMTgiIAoDU0hKEgoyMDI1LTEyLTE4GgNET0gqAlFSMgQxMDYxIh8KA0RPSBIKMjAyNS0xMi0xOBoDWVlaKgJRUjIDNzY3Ih8KA1lZWhIKMjAyNS0xMi0xOBoDWVZSKgJXUzIDNzM3agcIARIDU0hKcgcIARIDWVZSQAFIAXABggELCP___________wGYAQE"
+      );
 
-    const fetched = await runFetcher(url, { debug: false });
-    console.log("Fetched page URL:", fetched.url);
-    console.log("HTML saved to output.html");
-  } catch (err) {
-    console.error("❌ Error during fetch:", err);
-  }
-})();
+      const fetched = await runFetcher(url, { debug: false });
+      console.log("Fetched page URL:", fetched.url);
+      console.log("HTML saved to output.html");
+    } catch (err) {
+      console.error("❌ Error during fetch:", err);
+    }
+  })();
+}

@@ -103,10 +103,11 @@ export function parseBookingFlights(html) {
             .text()
             .trim() || null;
 
-        const airlineText = $(seg)
+        const [airline, flight_code, seat_class, aircraft] = $(seg)
           .find("div.MX5RWe.sSHqwe.y52p7d")
-          .text()
-          .trim();
+          .find("span.Xsgmwe")
+          .map((_, t) => $(t).text().trim() || null)
+          .get();
 
         const duration =
           $(seg).find("div.P102Lb.sSHqwe.y52p7d").text().trim() || null;
@@ -116,7 +117,10 @@ export function parseBookingFlights(html) {
           destination,
           departure_time: depTime,
           arrival_time: arrTime,
-          airline_text: airlineText,
+          airline,
+          flight_code,
+          seat_class,
+          aircraft,
           duration,
         });
       });
@@ -134,23 +138,30 @@ export function parseBookingFlights(html) {
       flights.push(flight);
   });
 
-  const booking_options = [];
+  const bookingOptions = [];
   // --- Booking options ---
   $("div.gN1nAc").each((_, link) => {
     const name = $(link).find("div.ogfYpf.AdWm1c").text().trim();
+    if (name.startsWith("Call ")) return;
 
     const price = $(link).find("div.BWTl3e > div.CQYfx").text().trim() || null;
 
     const isAirline = $(link).find("div.sSHqwe.wZlgrf.EA71Tc").length != 0;
 
-    booking_options.push({
+    bookingOptions.push({
       name,
       price,
       is_direct_airline: isAirline,
     });
   });
 
-  return { flights, booking_options };
+  // If there is one flight and multiple booking options,
+  // attach the booking options to that flight.
+  if (flights.length === 1 && bookingOptions.length > 0) {
+    flights[0].booking_options = bookingOptions;
+  }
+
+  return { flights };
 }
 
 if (process.argv[1].endsWith("parser.js")) {

@@ -1,0 +1,90 @@
+{
+  "title": "Google Flights Scraper Input",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "flights": {
+      "title": "Itinerary",
+      "type": "array",
+      "description": "Array of trip legs to build the Google Flights URL.",
+      "editor": "json",
+      "prefill": [
+        {
+          "origin": { "code": "YVR" },
+          "destination": { "code": "NRT" },
+          "travel_date": "2025-12-03"
+        },
+        {
+          "origin": { "code": "NRT" },
+          "destination": { "code": "YVR" },
+          "travel_date": "2025-12-10"
+        }
+      ],
+      "items": {
+        "type": "object",
+        "properties": {
+          "origin": {
+            "type": "object",
+            "properties": { "code": { "type": "string" } },
+            "required": ["code"]
+          },
+          "destination": {
+            "type": "object",
+            "properties": { "code": { "type": "string" } },
+            "required": ["code"]
+          },
+          "travel_date": {
+            "type": "string",
+            "description": "Flight date in YYYY-MM-DD format"
+          }
+        },
+        "required": ["origin", "destination", "travel_date"]
+      }
+    },
+    "passengers": {
+      "title": "Passengers",
+      "type": "object",
+      "description": "Number of passengers by type.",
+      "editor": "json",
+      "prefill": { "adult": 1 },
+      "properties": {
+        "adult": { "type": "integer", "default": 1 },
+        "child": { "type": "integer", "default": 0 },
+        "infant": { "type": "integer", "default": 0 }
+      }
+    },
+    "cabin_class": {
+      "title": "Cabin Class",
+      "type": "string",
+      "enum": ["economy", "premium economy", "business", "first"],
+      "default": "economy"
+    },
+    "trip_type": {
+      "title": "Trip Type",
+      "type": "string",
+      "enum": [
+        "trip_type_round",
+        "trip_type_one_way",
+        "trip_type_multi_city"
+      ],
+      "default": "trip_type_round"
+    },
+    "type": {
+      "title": "Page Type",
+      "type": "string",
+      "description": "The type of Google Flights page to scrape.",
+      "enum": ["search", "booking"],
+      "default": "booking"
+    },
+    "debug": {
+      "title": "Debug Mode",
+      "type": "boolean",
+      "description": "If true, the browser will be visible. Useful for debugging.",
+      "default": false
+    }
+  },
+  "required": [
+    "itinerary",
+    "type"
+  ]
+}

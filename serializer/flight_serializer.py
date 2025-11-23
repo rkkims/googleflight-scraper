@@ -90,29 +90,10 @@ class FlightSerializer:
         msg.ParseFromString(raw)
         return MessageToDict(msg, preserving_proto_field_name=True)
 
-# --- Example usage ---
+# --- Main execution block for Apify actor ---
 if __name__ == "__main__":
-    canonical = {
-        "cabin_class": "economy",
-        "itinerary": [
-            {
-                "origin": {"code": "YVR"},
-                "destination": {"code": "NRT"},
-                "travel_date": "2025-12-03",
-            },
-            {
-                "origin": {"code": "NRT"},
-                "destination": {"code": "YVR"},
-                "travel_date": "2025-12-10",
-                "segments": [],
-            },
-        ],
-        "passengers": {"adult": 2, "child": 1, "infant": 0},
-        "trip_type": "trip_type_round",
-    }
-
-    encoded = FlightSerializer.serialize_base64url(canonical)
-    print("Base64 TFS Param:", encoded)
-
-    decoded = FlightSerializer.deserialize(encoded)
-    print(json.dumps(decoded, indent=2))
+    # This script will be called by the Node.js part of the actor.
+    # It reads a JSON object from stdin, which is the actor input.
+    input_data = json.load(sys.stdin)
+    encoded_tfs = FlightSerializer.serialize_base64url(input_data)
+    print(encoded_tfs)
