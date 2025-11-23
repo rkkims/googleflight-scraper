@@ -1,16 +1,12 @@
 {
-  "itinerary": [
-    {
-      "origin": { "code": "YVR" },
-      "destination": { "code": "SFO" },
-      "travel_date": "2025-12-24"
-    }
-  ],
+  "origin": "YVR",
+  "destination": "SFO",
+  "departure_date": "2025-12-24",
+  "return_date": "2025-12-31",
   "passengers": {
     "adult": 1
   },
-  "cabin_class": "economy",
-  "trip_type": "trip_type_one_way",
+  "seat": "economy",
   "type": "search",
   "debug": false
 }
