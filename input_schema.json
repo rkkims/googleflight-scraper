@@ -40,18 +40,21 @@
         "adult": {
           "title": "Adults",
           "type": "integer",
+          "description": "Number of adult passengers.",
           "default": 1,
           "editor": "number"
         },
         "child": {
           "title": "Children",
           "type": "integer",
+          "description": "Number of child passengers.",
           "default": 0,
           "editor": "number"
         },
         "infant": {
           "title": "Infants",
           "type": "integer",
+          "description": "Number of infant passengers.",
           "default": 0,
           "editor": "number"
         }
