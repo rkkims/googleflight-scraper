@@ -166,11 +166,4 @@ export function parseBookingFlights(html) {
   return { flights };
 }
 
-if (process.argv[1].endsWith("parser.js")) {
-  const html = fs.readFileSync("./output.html", "utf8");
-  const result = parseSearchFlights(html);
-  fs.writeFileSync("flights.json", JSON.stringify(result, null, 2));
-  // console.log(
-  //   `✅ ${result.flights.length} flights and prices saved to flights_with_prices.json`
-  // );
-}
+

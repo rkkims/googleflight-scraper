@@ -18,7 +18,7 @@ export async function runFetcher(urlObj, options = {}) {
   if (!(urlObj instanceof URL))
     throw new TypeError("runFetcher expects a URL object.");
 
-  const { debug = false } = options;
+  const { debug = false, id = Date.now() } = options;
   const urlStr = urlObj.href;
   const isBookingPage = urlStr.includes("/flights/booking?tfs=");
   const xhrKeyword = isBookingPage ? "GetBookingResults" : "GetShoppingResults";
@@ -111,8 +111,9 @@ export async function runFetcher(urlObj, options = {}) {
 
       // --- Save final HTML output
       const htmlContent = await page.content();
-      fs.writeFileSync("output.html", htmlContent, "utf-8");
-      log.info("✅ HTML content saved to output.html");
+      const filename = `output-${id}.html`;
+      fs.writeFileSync(filename, htmlContent, "utf-8");
+      log.info(`✅ HTML content saved to ${filename}`);
 
       result = { url: request.url, html: htmlContent };
     },
@@ -129,20 +130,4 @@ export async function runFetcher(urlObj, options = {}) {
   return result;
 }
 
-// --- Test run ---
-if (process.argv[1].endsWith("fetcher.js")) {
-  (async () => {
-    try {
-      // Example URL (replace with booking or search as needed)
-      const url = new URL(
-        "https://www.google.com/travel/flights/search?tfs=CBwQAhqCARIKMjAyNS0xMi0xMSIfCgNZVlISCjIwMjUtMTItMTEaA1NGTyoCQUMyAzU2NCIfCgNTRk8SCjIwMjUtMTItMTEaA0RPSCoCUVIyAzczOCIgCgNET0gSCjIwMjUtMTItMTIaA1NISioCUVIyBDEwNThqBwgBEgNZVlJyBwgBEgNTSEoaHhIKMjAyNS0xMi0xOGoHCAESA1NISnIHCAESA1lWUkABSAFwAYIBCwj___________8BmAEB"
-      );
 
-      const fetched = await runFetcher(url, { debug: false });
-      // console.log("Fetched page URL:", fetched.url);
-      // console.log("HTML saved to output.html");
-    } catch (err) {
-      console.error("❌ Error during fetch:", err);
-    }
-  })();
-}

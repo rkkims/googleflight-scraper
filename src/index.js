@@ -68,7 +68,7 @@ try {
     const googleFlightsUrl = await generatGoogleFlightsURL(bookingTfs, {
       type: "booking",
     });
-    const fetched = await runFetcher(googleFlightsUrl, { debug });
+    const fetched = await runFetcher(googleFlightsUrl, { debug, id: `booking-${Date.now()}` });
     let parsed = parseBookingFlights(fetched.html);
 
     if (rawInput.only_direct_airline_booking) {
@@ -102,7 +102,7 @@ try {
     const outboundUrl = await generatGoogleFlightsURL(outboundTfs, {
       type: "search",
     });
-    const outboundHtml = (await runFetcher(outboundUrl, { debug })).html;
+    const outboundHtml = (await runFetcher(outboundUrl, { debug, id: `outbound-search-${Date.now()}` })).html;
     const outboundFlights = parseSearchFlights(outboundHtml).flights;
     // console.log(`Found ${outboundFlights.length} outbound flight options.`);
 
@@ -137,13 +137,13 @@ try {
         const returnUrl = await generatGoogleFlightsURL(returnTfs, {
           type: "search",
         });
-        const returnHtml = (await runFetcher(returnUrl, { debug })).html;
+        const returnHtml = (await runFetcher(returnUrl, { debug, id: `return-search-${outboundFlights.indexOf(outboundFlight)}-${Date.now()}` })).html;
         const returnFlights = parseSearchFlights(returnHtml).flights;
         // console.log(`Found ${returnFlights.length} return flight options.`);
 
         // 3. For each outbound-return pair, get the price
         // console.log(`Getting booking details for ${returnFlights.length} round-trip combinations...`);
-        const bookingPromises = returnFlights.map(async (returnFlight) => {
+        const bookingPromises = returnFlights.map(async (returnFlight, i) => {
           const bookingInput = {
             ...normalizedInput,
             itinerary: [
@@ -165,7 +165,7 @@ try {
           const bookingUrl = await generatGoogleFlightsURL(bookingTfs, {
             type: "booking",
           });
-          const bookingHtml = (await runFetcher(bookingUrl, { debug })).html;
+          const bookingHtml = (await runFetcher(bookingUrl, { debug, id: `booking-round-trip-${i}-${Date.now()}` })).html;
           return { ...parseBookingFlights(bookingHtml), bookingUrl };
         });
 
@@ -179,7 +179,7 @@ try {
     } else {
       // One-way trip: get price for each found flight
       // console.log("Getting booking details for one-way flights...");
-      const bookingPromises = outboundFlights.map(async (flight) => {
+      const bookingPromises = outboundFlights.map(async (flight, i) => {
         const bookingInput = {
           ...normalizedInput,
           itinerary: [
@@ -193,7 +193,7 @@ try {
         const bookingUrl = await generatGoogleFlightsURL(bookingTfs, {
           type: "booking",
         });
-        const bookingHtml = (await runFetcher(bookingUrl, { debug })).html;
+        const bookingHtml = (await runFetcher(bookingUrl, { debug, id: `booking-one-way-${i}-${Date.now()}` })).html;
         return { ...parseBookingFlights(bookingHtml), bookingUrl };
       });
 
