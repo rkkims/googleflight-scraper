@@ -142,8 +142,8 @@ try {
         console.log(`Found ${returnFlights.length} return flight options.`);
 
         // 3. For each outbound-return pair, get the price
-
-        for (const returnFlight of returnFlights) {
+        console.log(`Getting booking details for ${returnFlights.length} round-trip combinations...`);
+        const bookingPromises = returnFlights.map(async (returnFlight) => {
           const bookingInput = {
             ...normalizedInput,
             itinerary: [
@@ -166,20 +166,20 @@ try {
             type: "booking",
           });
           const bookingHtml = (await runFetcher(bookingUrl, { debug })).html;
-          const bookingDetails = parseBookingFlights(bookingHtml);
-          finalResults.push(bookingDetails);
-          if (rawInput.max_results > 0 && finalResults.length >= rawInput.max_results) {
-            break; // Break inner loop
-          }
-        }
+          return parseBookingFlights(bookingHtml);
+        });
+
+        const allBookingDetails = await Promise.all(bookingPromises);
+        finalResults.push(...allBookingDetails);
+        
         if (rawInput.max_results > 0 && finalResults.length >= rawInput.max_results) {
           break; // Break outer loop
         }
       }
     } else {
       // One-way trip: get price for each found flight
-      for (const flight of outboundFlights) {
-        console.log("Getting booking details for one-way flight...");
+      console.log("Getting booking details for one-way flights...");
+      const bookingPromises = outboundFlights.map(async (flight) => {
         const bookingInput = {
           ...normalizedInput,
           itinerary: [
@@ -194,12 +194,16 @@ try {
           type: "booking",
         });
         const bookingHtml = (await runFetcher(bookingUrl, { debug })).html;
-        const bookingDetails = parseBookingFlights(bookingHtml);
-        finalResults.push(bookingDetails);
-        if (rawInput.max_results > 0 && finalResults.length >= rawInput.max_results) {
-          break; // Break loop
-        }
+        return parseBookingFlights(bookingHtml);
+      });
+
+      let allBookingDetails = await Promise.all(bookingPromises);
+      
+      if (rawInput.max_results > 0) {
+        allBookingDetails = allBookingDetails.slice(0, rawInput.max_results);
       }
+
+      finalResults.push(...allBookingDetails);
     }
 
     if (finalResults.length > 0) {
