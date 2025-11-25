@@ -36,6 +36,7 @@
       "title": "Passengers",
       "type": "object",
       "description": "Number of passengers by type.",
+      "editor": "object",
       "properties": {
         "adult": {
           "title": "Adults",
