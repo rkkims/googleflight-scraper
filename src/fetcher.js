@@ -1,4 +1,5 @@
 import { PlaywrightCrawler } from "crawlee";
+import { Actor } from "apify";
 import fs from "fs";
 
 /**
@@ -24,13 +25,18 @@ export async function runFetcher(urlObj, options = {}) {
   let result = null;
 
   const crawler = new PlaywrightCrawler({
+    proxyConfiguration: await Actor.createProxyConfiguration(),
     headless: !debug,
     useSessionPool: true,
     maxRequestRetries: 4,
-    maxConcurrency: 2,
+    maxConcurrency: 5, // Increased concurrency as we are using proxies
     navigationTimeoutSecs: 45,
 
     async requestHandler({ page, request, log }) {
+      // Set a more realistic user-agent. This can be randomized further if needed.
+      await page.setExtraHTTPHeaders({
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      });
       log.info(`Fetching: ${request.url}`);
       await page.goto(request.url, { waitUntil: "domcontentloaded" });
 
