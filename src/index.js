@@ -166,7 +166,7 @@ try {
             type: "booking",
           });
           const bookingHtml = (await runFetcher(bookingUrl, { debug })).html;
-          return parseBookingFlights(bookingHtml);
+          return { ...parseBookingFlights(bookingHtml), bookingUrl };
         });
 
         const allBookingDetails = await Promise.all(bookingPromises);
@@ -194,7 +194,7 @@ try {
           type: "booking",
         });
         const bookingHtml = (await runFetcher(bookingUrl, { debug })).html;
-        return parseBookingFlights(bookingHtml);
+        return { ...parseBookingFlights(bookingHtml), bookingUrl };
       });
 
       let allBookingDetails = await Promise.all(bookingPromises);
