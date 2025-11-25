@@ -42,17 +42,17 @@ const { type, debug, only_direct_airline_booking, ...userInput } = rawInput;
 
 try {
   // 1️⃣ Normalize the user input
-  console.log("Calling Python input normalizer...");
+  // console.log("Calling Python input normalizer...");
   const normalizedInputJson = await runPythonScript(
     "src/input_normalizer/input_normalize.py",
     userInput
   );
   const normalizedInput = JSON.parse(normalizedInputJson);
-  console.log("Received normalized input from Python.");
+  // console.log("Received normalized input from Python.");
 
   if (type === "booking") {
     // 2️⃣ Handle Booking Flow
-    console.log("Starting Booking flow...");
+    // console.log("Starting Booking flow...");
     if (!normalizedInput.itinerary?.every((leg) => leg.segments?.length > 0)) {
       throw new Error(
         "For 'booking' type, 'fixed_flights' must be provided with specific flight segments for all legs of the journey."
@@ -63,7 +63,7 @@ try {
       "src/serializer/flight_serializer.py",
       normalizedInput
     );
-    console.log(`Received booking TFS from Python: ${bookingTfs}`);
+    // console.log(`Received booking TFS from Python: ${bookingTfs}`);
 
     const googleFlightsUrl = await generatGoogleFlightsURL(bookingTfs, {
       type: "booking",
@@ -84,7 +84,7 @@ try {
     await Actor.pushData(parsed);
   } else {
     // 3️⃣ Handle Search Flow
-    console.log("Starting Search flow...");
+    // console.log("Starting Search flow...");
 
     // 1. Search for outbound flights
     const outboundLeg = normalizedInput.itinerary[0];
@@ -94,7 +94,7 @@ try {
       trip_type: "trip_type_one_way",
     };
 
-    console.log("Searching for outbound flights...");
+    // console.log("Searching for outbound flights...");
     const outboundTfs = await runPythonScript(
       "src/serializer/flight_serializer.py",
       outboundInput
@@ -104,7 +104,7 @@ try {
     });
     const outboundHtml = (await runFetcher(outboundUrl, { debug })).html;
     const outboundFlights = parseSearchFlights(outboundHtml).flights;
-    console.log(`Found ${outboundFlights.length} outbound flight options.`);
+    // console.log(`Found ${outboundFlights.length} outbound flight options.`);
 
     const finalResults = [];
 
@@ -121,7 +121,7 @@ try {
             outbound: outboundFlight.segments,
           },
         };
-        console.log("Searching for return flights for an outbound option...");
+        // console.log("Searching for return flights for an outbound option...");
         // We need to re-normalize and serialize.
         const returnNormalizedJson = await runPythonScript(
           "src/input_normalizer/input_normalize.py",
@@ -139,10 +139,10 @@ try {
         });
         const returnHtml = (await runFetcher(returnUrl, { debug })).html;
         const returnFlights = parseSearchFlights(returnHtml).flights;
-        console.log(`Found ${returnFlights.length} return flight options.`);
+        // console.log(`Found ${returnFlights.length} return flight options.`);
 
         // 3. For each outbound-return pair, get the price
-        console.log(`Getting booking details for ${returnFlights.length} round-trip combinations...`);
+        // console.log(`Getting booking details for ${returnFlights.length} round-trip combinations...`);
         const bookingPromises = returnFlights.map(async (returnFlight) => {
           const bookingInput = {
             ...normalizedInput,
@@ -178,7 +178,7 @@ try {
       }
     } else {
       // One-way trip: get price for each found flight
-      console.log("Getting booking details for one-way flights...");
+      // console.log("Getting booking details for one-way flights...");
       const bookingPromises = outboundFlights.map(async (flight) => {
         const bookingInput = {
           ...normalizedInput,
@@ -220,7 +220,7 @@ try {
       }
       await Actor.pushData(finalResults);
     } else {
-      console.log("No flight combinations found.");
+      // console.log("No flight combinations found.");
       await Actor.pushData([]);
     }
   }

@@ -139,8 +139,8 @@ if (process.argv[1].endsWith("fetcher.js")) {
       );
 
       const fetched = await runFetcher(url, { debug: false });
-      console.log("Fetched page URL:", fetched.url);
-      console.log("HTML saved to output.html");
+      // console.log("Fetched page URL:", fetched.url);
+      // console.log("HTML saved to output.html");
     } catch (err) {
       console.error("❌ Error during fetch:", err);
     }
