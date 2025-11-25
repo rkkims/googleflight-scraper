@@ -4,75 +4,105 @@ import { runFetcher } from "./fetcher.js"; // Path updated for src directory
 import { parseBookingFlights, parseSearchFlights } from "./parser.js"; // Path updated for src directory
 import { generatGoogleFlightsURL } from "./url_generator.js"; // Path updated for src directory
 
+/**
+ * Spawns a Python process to handle data transformation.
+ * @param {string} scriptPath - Path to the Python script.
+ * @param {object} inputData - The JSON object to send to the script's stdin.
+ * @returns {Promise<string>} The stdout from the Python script.
+ */
+function runPythonScript(scriptPath, inputData) {
+  return new Promise((resolve, reject) => {
+    const pythonProcess = spawn("python3", [scriptPath]);
+    let stdout = "";
+    let stderr = "";
+
+    pythonProcess.stdout.on("data", (data) => (stdout += data.toString()));
+    pythonProcess.stderr.on("data", (data) => (stderr += data.toString()));
+
+    pythonProcess.on("close", (code) => {
+      if (code !== 0) {
+        return reject(
+          new Error(`Python script ${scriptPath} exited with code ${code}: ${stderr}`)
+        );
+      }
+      resolve(stdout.trim());
+    });
+
+    pythonProcess.stdin.write(JSON.stringify(inputData));
+    pythonProcess.stdin.end();
+  });
+}
+
 await Actor.init();
 
 const rawInput = await Actor.getInput();
 const { type, debug, ...userInput } = rawInput;
 
-// 1️⃣ Normalize the user input by calling the Python normalizer script
-console.log("Calling Python input normalizer...");
-const normalizerProcess = spawn("python3", ["src/input_normalizer/input_normalize.py"]);
+try {
+  // 1️⃣ Normalize the user input
+  console.log("Calling Python input normalizer...");
+  const normalizedInputJson = await runPythonScript(
+    "src/input_normalizer/input_normalize.py",
+    userInput
+  );
+  const normalizedInput = JSON.parse(normalizedInputJson);
+  console.log("Received normalized input from Python.");
 
-let normalizedInputJson;
-const normalizerPromise = new Promise((resolve, reject) => {
-  let stdout = "";
-  let stderr = "";
-  normalizerProcess.stdout.on("data", (data) => (stdout += data.toString()));
-  normalizerProcess.stderr.on("data", (data) => (stderr += data.toString()));
-  normalizerProcess.on("close", (code) => {
-    if (code !== 0) {
-      return reject(
-        new Error(`Python script exited with code ${code}: ${stderr}`)
-      );
+  if (type === "booking") {
+    // 2️⃣ Handle Booking Flow
+    console.log("Starting Booking flow...");
+    if (!normalizedInput.itinerary?.every(leg => leg.segments?.length > 0)) {
+        throw new Error("For 'booking' type, 'fixed_flights' must be provided with specific flight segments for all legs of the journey.");
     }
-    normalizedInputJson = stdout.trim();
-    resolve();
-  });
-});
 
-normalizerProcess.stdin.write(JSON.stringify(userInput));
-normalizerProcess.stdin.end();
+    const tfsUrl = await runPythonScript("src/serializer/flight_serializer.py", normalizedInput);
+    console.log(`Received booking TFS from Python: ${tfsUrl}`);
 
-await normalizerPromise;
-console.log("Received normalized input from Python.");
+    const googleFlightsUrl = await generatGoogleFlightsURL(tfsUrl, { type: "booking" });
+    const fetched = await runFetcher(googleFlightsUrl, { debug });
+    const parsed = parseBookingFlights(fetched.html);
 
-// 2️⃣ Get tfs from Python serializer using the normalized input
-console.log("Calling Python serializer...");
-const serializerProcess = spawn("python3", ["src/serializer/flight_serializer.py"]); // Path updated for src directory
+    await Actor.pushData(parsed);
 
-let tfsUrl;
-const serializerPromise = new Promise((resolve, reject) => {
-  let stdout = "";
-  let stderr = "";
-  serializerProcess.stdout.on("data", (data) => (stdout += data.toString()));
-  serializerProcess.stderr.on("data", (data) => (stderr += data.toString()));
-  serializerProcess.on("close", (code) => {
-    if (code !== 0) {
-      return reject(new Error(`Python script exited with code ${code}: ${stderr}`));
+  } else {
+    // 3️⃣ Handle Search Flow
+    console.log("Starting Search flow...");
+    const searchResults = {
+        outbound: [],
+        return: []
+    };
+
+    // Create a search for the outbound leg
+    const outboundLeg = normalizedInput.itinerary[0];
+    const outboundInput = { ...normalizedInput, itinerary: [outboundLeg], trip_type: "trip_type_one_way" };
+    
+    console.log("Searching for outbound flights...");
+    const outboundTfs = await runPythonScript("src/serializer/flight_serializer.py", outboundInput);
+    const outboundUrl = await generatGoogleFlightsURL(outboundTfs, { type: "search" });
+    const outboundFetched = await runFetcher(outboundUrl, { debug });
+    searchResults.outbound = parseSearchFlights(outboundFetched.html);
+    console.log(`Found ${searchResults.outbound.flights.length} outbound flight options.`);
+
+    // If it's a round trip, create a separate search for the return leg
+    if (normalizedInput.trip_type === "trip_type_round" && normalizedInput.itinerary.length > 1) {
+        const returnLeg = normalizedInput.itinerary[1];
+        const returnInput = { ...normalizedInput, itinerary: [returnLeg], trip_type: "trip_type_one_way" };
+
+        console.log("Searching for return flights...");
+        const returnTfs = await runPythonScript("src/serializer/flight_serializer.py", returnInput);
+        const returnUrl = await generatGoogleFlightsURL(returnTfs, { type: "search" });
+        const returnFetched = await runFetcher(returnUrl, { debug });
+        searchResults.return = parseSearchFlights(returnFetched.html);
+        console.log(`Found ${searchResults.return.length} return flight options.`);
     }
-    tfsUrl = stdout.trim();
-    resolve();
-  });
-});
 
-pythonProcess.stdin.write(JSON.stringify(serializerInput));
-pythonProcess.stdin.end();
-const serializerInput = JSON.parse(normalizedInputJson);
-serializerProcess.stdin.write(JSON.stringify({ ...serializerInput, type, debug }));
-serializerProcess.stdin.end();
+    await Actor.pushData(searchResults);
+  }
 
-await serializerPromise;
-console.log(`Received tfs from Python: ${tfsUrl}`);
-
-// 3️⃣ Generate URL and fetch page
-const googleFlightsUrl = await generatGoogleFlightsURL(tfsUrl, { type });
-const fetched = await runFetcher(googleFlightsUrl, { debug });
-
-// 4️⃣ Parse results
-const parser = type === "booking" ? parseBookingFlights : parseSearchFlights;
-const parsed = parser(fetched.html);
-
-// 5️⃣ Store results
-await Actor.pushData(parsed);
+} catch (error) {
+    console.error("An error occurred during the actor run:");
+    console.error(error);
+    await Actor.fail(error.message);
+}
 
 await Actor.exit();

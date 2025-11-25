@@ -166,9 +166,9 @@ export function parseBookingFlights(html) {
 
 if (process.argv[1].endsWith("parser.js")) {
   const html = fs.readFileSync("./output.html", "utf8");
-  const result = parseBookingFlights(html);
+  const result = parseSearchFlights(html);
   fs.writeFileSync(
-    "./flights_with_prices.json",
+    "../output/flights.json",
     JSON.stringify(result, null, 2)
   );
   console.log(
