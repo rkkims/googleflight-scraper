@@ -77,9 +77,7 @@ export async function runFetcher(urlObj, options = {}) {
           if (Date.now() - startTime > timeoutMs) {
             page.off("response", onResponse);
             clearInterval(timer);
-            reject(
-              new Error(`Timeout waiting for ${xhrKeyword} XHR to complete`)
-            );
+            reject(new Error(`Timeout waiting for a request`));
           }
         }, 100);
       });
@@ -126,7 +124,7 @@ export async function runFetcher(urlObj, options = {}) {
 
   await crawler.run([{ url: urlStr }]);
   if (!result) {
-    throw new Error(`Request ${urlStr} failed after retries.`);
+    console.warn(`Request ${urlStr} failed after retries.`);
   }
   return result;
 }
