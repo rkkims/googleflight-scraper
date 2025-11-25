@@ -107,6 +107,9 @@ export async function runFetcher(urlObj, options = {}) {
   });
 
   await crawler.run([{ url: urlStr }]);
+  if (!result) {
+    throw new Error(`Request ${urlStr} failed after retries.`);
+  }
   return result;
 }
 
@@ -116,7 +119,7 @@ if (process.argv[1].endsWith("fetcher.js")) {
     try {
       // Example URL (replace with booking or search as needed)
       const url = new URL(
-        "https://www.google.com/travel/flights/booking?tfs=CBwQAhqCARIKMjAyNS0xMi0xMSIfCgNZVlISCjIwMjUtMTItMTEaA1NGTyoCQUMyAzU2NCIfCgNTRk8SCjIwMjUtMTItMTEaA0RPSCoCUVIyAzczOCIgCgNET0gSCjIwMjUtMTItMTIaA1NISioCUVIyBDEwNThqBwgBEgNZVlJyBwgBEgNTSEoaggESCjIwMjUtMTItMTgiIAoDU0hKEgoyMDI1LTEyLTE4GgNET0gqAlFSMgQxMDYxIh8KA0RPSBIKMjAyNS0xMi0xOBoDWVlaKgJRUjIDNzY3Ih8KA1lZWhIKMjAyNS0xMi0xOBoDWVZSKgJXUzIDNzM3agcIARIDU0hKcgcIARIDWVZSQAFIAXABggELCP___________wGYAQE"
+        "https://www.google.com/travel/flights/search?tfs=CBwQAhqCARIKMjAyNS0xMi0xMSIfCgNZVlISCjIwMjUtMTItMTEaA1NGTyoCQUMyAzU2NCIfCgNTRk8SCjIwMjUtMTItMTEaA0RPSCoCUVIyAzczOCIgCgNET0gSCjIwMjUtMTItMTIaA1NISioCUVIyBDEwNThqBwgBEgNZVlJyBwgBEgNTSEoaHhIKMjAyNS0xMi0xOGoHCAESA1NISnIHCAESA1lWUkABSAFwAYIBCwj___________8BmAEB"
       );
 
       const fetched = await runFetcher(url, { debug: false });

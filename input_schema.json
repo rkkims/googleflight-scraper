@@ -36,22 +36,24 @@
       "title": "Passengers",
       "type": "object",
       "description": "Number of passengers by type.",
-      "editor": "json",
-      "prefill": {
-        "adult": 1
-      },
       "properties": {
         "adult": {
+          "title": "Adults",
           "type": "integer",
-          "default": 1
+          "default": 1,
+          "editor": "number"
         },
         "child": {
+          "title": "Children",
           "type": "integer",
-          "default": 0
+          "default": 0,
+          "editor": "number"
         },
         "infant": {
+          "title": "Infants",
           "type": "integer",
-          "default": 0
+          "default": 0,
+          "editor": "number"
         }
       }
     },

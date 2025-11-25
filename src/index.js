@@ -22,7 +22,9 @@ function runPythonScript(scriptPath, inputData) {
     pythonProcess.on("close", (code) => {
       if (code !== 0) {
         return reject(
-          new Error(`Python script ${scriptPath} exited with code ${code}: ${stderr}`)
+          new Error(
+            `Python script ${scriptPath} exited with code ${code}: ${stderr}`
+          )
         );
       }
       resolve(stdout.trim());
@@ -51,58 +53,146 @@ try {
   if (type === "booking") {
     // 2️⃣ Handle Booking Flow
     console.log("Starting Booking flow...");
-    if (!normalizedInput.itinerary?.every(leg => leg.segments?.length > 0)) {
-        throw new Error("For 'booking' type, 'fixed_flights' must be provided with specific flight segments for all legs of the journey.");
+    if (!normalizedInput.itinerary?.every((leg) => leg.segments?.length > 0)) {
+      throw new Error(
+        "For 'booking' type, 'fixed_flights' must be provided with specific flight segments for all legs of the journey."
+      );
     }
 
-    const tfsUrl = await runPythonScript("src/serializer/flight_serializer.py", normalizedInput);
-    console.log(`Received booking TFS from Python: ${tfsUrl}`);
+    const bookingTfs = await runPythonScript(
+      "src/serializer/flight_serializer.py",
+      normalizedInput
+    );
+    console.log(`Received booking TFS from Python: ${bookingTfs}`);
 
-    const googleFlightsUrl = await generatGoogleFlightsURL(tfsUrl, { type: "booking" });
+    const googleFlightsUrl = await generatGoogleFlightsURL(bookingTfs, {
+      type: "booking",
+    });
     const fetched = await runFetcher(googleFlightsUrl, { debug });
     const parsed = parseBookingFlights(fetched.html);
 
     await Actor.pushData(parsed);
-
   } else {
     // 3️⃣ Handle Search Flow
     console.log("Starting Search flow...");
-    const searchResults = {
-        outbound: [],
-        return: []
+
+    // 1. Search for outbound flights
+    const outboundLeg = normalizedInput.itinerary[0];
+    const outboundInput = {
+      ...normalizedInput,
+      itinerary: [outboundLeg],
+      trip_type: "trip_type_one_way",
     };
 
-    // Create a search for the outbound leg
-    const outboundLeg = normalizedInput.itinerary[0];
-    const outboundInput = { ...normalizedInput, itinerary: [outboundLeg], trip_type: "trip_type_one_way" };
-    
     console.log("Searching for outbound flights...");
-    const outboundTfs = await runPythonScript("src/serializer/flight_serializer.py", outboundInput);
-    const outboundUrl = await generatGoogleFlightsURL(outboundTfs, { type: "search" });
-    const outboundFetched = await runFetcher(outboundUrl, { debug });
-    searchResults.outbound = parseSearchFlights(outboundFetched.html);
-    console.log(`Found ${searchResults.outbound.flights.length} outbound flight options.`);
+    const outboundTfs = await runPythonScript(
+      "src/serializer/flight_serializer.py",
+      outboundInput
+    );
+    const outboundUrl = await generatGoogleFlightsURL(outboundTfs, {
+      type: "search",
+    });
+    const outboundHtml = (await runFetcher(outboundUrl, { debug })).html;
+    const outboundFlights = parseSearchFlights(outboundHtml).flights;
+    console.log(`Found ${outboundFlights.length} outbound flight options.`);
 
-    // If it's a round trip, create a separate search for the return leg
-    if (normalizedInput.trip_type === "trip_type_round" && normalizedInput.itinerary.length > 1) {
-        const returnLeg = normalizedInput.itinerary[1];
-        const returnInput = { ...normalizedInput, itinerary: [returnLeg], trip_type: "trip_type_one_way" };
+    const finalResults = [];
 
-        console.log("Searching for return flights...");
-        const returnTfs = await runPythonScript("src/serializer/flight_serializer.py", returnInput);
-        const returnUrl = await generatGoogleFlightsURL(returnTfs, { type: "search" });
-        const returnFetched = await runFetcher(returnUrl, { debug });
-        searchResults.return = parseSearchFlights(returnFetched.html);
-        console.log(`Found ${searchResults.return.length} return flight options.`);
+    if (
+      normalizedInput.trip_type === "trip_type_round" &&
+      normalizedInput.itinerary.length > 1
+    ) {
+      // 2. For each outbound flight, search for return flights
+      for (const outboundFlight of outboundFlights) {
+        // Prepare input to find return flights, with the outbound flight fixed.
+        const returnSearchUserInput = {
+          ...userInput,
+          fixed_flights: {
+            outbound: outboundFlight.segments,
+          },
+        };
+        console.log("Searching for return flights for an outbound option...");
+        // We need to re-normalize and serialize.
+        const returnNormalizedJson = await runPythonScript(
+          "src/input_normalizer/input_normalize.py",
+          returnSearchUserInput
+        );
+        const returnInput = JSON.parse(returnNormalizedJson);
+
+        // Now serialize for the search URL.
+        const returnTfs = await runPythonScript(
+          "src/serializer/flight_serializer.py",
+          returnInput
+        );
+        const returnUrl = await generatGoogleFlightsURL(returnTfs, {
+          type: "search",
+        });
+        const returnHtml = (await runFetcher(returnUrl, { debug })).html;
+        const returnFlights = parseSearchFlights(returnHtml).flights;
+        console.log(`Found ${returnFlights.length} return flight options.`);
+
+        // 3. For each outbound-return pair, get the price
+
+        for (const returnFlight of returnFlights) {
+          const bookingInput = {
+            ...normalizedInput,
+            itinerary: [
+              {
+                ...normalizedInput.itinerary[0],
+                segments: outboundFlight.segments,
+              },
+              {
+                ...normalizedInput.itinerary[1],
+                segments: returnFlight.segments,
+              },
+            ],
+            trip_type: "trip_type_round",
+          };
+          const bookingTfs = await runPythonScript(
+            "src/serializer/flight_serializer.py",
+            bookingInput
+          );
+          const bookingUrl = await generatGoogleFlightsURL(bookingTfs, {
+            type: "booking",
+          });
+          const bookingHtml = (await runFetcher(bookingUrl, { debug })).html;
+          const bookingDetails = parseBookingFlights(bookingHtml);
+        }
+      }
+    } else {
+      // One-way trip: get price for each found flight
+      for (const flight of outboundFlights) {
+        console.log("Getting booking details for one-way flight...");
+        const bookingInput = {
+          ...normalizedInput,
+          itinerary: [
+            { ...normalizedInput.itinerary[0], segments: flight.segments },
+          ],
+        };
+        const bookingTfs = await runPythonScript(
+          "src/serializer/flight_serializer.py",
+          bookingInput
+        );
+        const bookingUrl = await generatGoogleFlightsURL(bookingTfs, {
+          type: "booking",
+        });
+        const bookingHtml = (await runFetcher(bookingUrl, { debug })).html;
+        const bookingDetails = parseBookingFlights(bookingHtml);
+        finalResults.push(bookingDetails);
+      }
     }
 
-    await Actor.pushData(searchResults);
+    if (finalResults.length > 0) {
+      await Actor.pushData(finalResults);
+    } else {
+      console.log("No flight combinations found.");
+      await Actor.pushData([]);
+    }
   }
-
 } catch (error) {
-    console.error("An error occurred during the actor run:");
-    console.error(error);
-    await Actor.fail(error.message);
+  console.error("An error occurred during the actor run:");
+  console.error(error);
+  await Actor.fail(error.message);
 }
 
 await Actor.exit();

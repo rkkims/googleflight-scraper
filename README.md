@@ -1,10 +1,10 @@
-# Google Flight Scraper - Input API
+# Google Flights Scraper
 
-This document provides a guide for using the Flight Search Input API. It details the JSON structure for flight searches, which is designed for flexibility by accepting various formats and normalizing them for internal processing.
+This Apify actor scrapes flight information from Google Flights. It can be used to search for one-way, round-trip, and multi-city flights, and retrieve booking details including prices, layovers, and carrier information.
 
 ---
 
-## Getting Started
+## Input Configuration
 
 To perform a flight search, you provide a JSON object with your travel details. The simplest search requires an origin, a destination, and a departure date.
 
@@ -171,6 +171,38 @@ The system will raise an error if the input is invalid. Common errors include:
 *   Missing `origin` or `destination` fields.
 *   Providing `return` segments in `fixed_flights` without `outbound` segments.
 *   Using an unrecognized date format.
+
+
+---
+
+## Actor Output
+
+The actor stores its results in the default dataset. The output is a JSON object with the following structure:
+
+**(TODO: Add a sample output JSON object here)**
+
+---
+
+## Usage
+
+### Local Development
+
+To run the actor locally, you need to have Node.js and Python installed.
+
+1.  Clone the repository.
+2.  Install dependencies:
+    ```bash
+    npm install
+    ```
+3.  Provide your input in the `storage/key_value_stores/default/INPUT.json` file.
+4.  Run the actor:
+    ```bash
+    npm start
+    ```
+
+### Apify Platform
+
+When running on the Apify platform, you can provide the input via the UI. The actor will run automatically and save the results in the default dataset.
 
 ---
 

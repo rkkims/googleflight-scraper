@@ -25,11 +25,11 @@ export function parseSearchFlights(html) {
             const [o, d, al, fn, date] = seg.split("-");
             if (date)
               segments.push({
-                origin: o,
-                destination: d,
+                origin_airport: o,
+                destination_airport: d,
                 airline_code: al,
                 flight_number: fn,
-                flight_date: date.replace(
+                departure_date: date.replace(
                   /^(\d{4})(\d{2})(\d{2})$/,
                   "$1-$2-$3"
                 ),
@@ -110,7 +110,9 @@ export function parseBookingFlights(html) {
           .get();
 
         const duration =
-          $(seg).find("div.P102Lb.sSHqwe.y52p7d").text().trim() || null;
+          ($(seg).find("div.P102Lb.sSHqwe.y52p7d").text().trim() || "")
+            .replace("Travel time: ", "")
+            .trim() || null;
 
         flight.segments.push({
           origin,
@@ -167,10 +169,7 @@ export function parseBookingFlights(html) {
 if (process.argv[1].endsWith("parser.js")) {
   const html = fs.readFileSync("./output.html", "utf8");
   const result = parseSearchFlights(html);
-  fs.writeFileSync(
-    "../output/flights.json",
-    JSON.stringify(result, null, 2)
-  );
+  fs.writeFileSync("flights.json", JSON.stringify(result, null, 2));
   console.log(
     `✅ ${result.flights.length} flights and prices saved to flights_with_prices.json`
   );

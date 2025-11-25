@@ -68,9 +68,13 @@ def normalize_input(raw: Dict[str, Any]) -> Dict[str, Any]:
     def normalize_segment(segment: Dict[str, Any]) -> Dict[str, Any]:
         """Convert flight segment into canonical form."""
         return {
-            "origin_airport": segment.get("origin_airport"),
-            "destination_airport": segment.get("destination_airport"),
-            "departure_date": parse_date(segment.get("date")),
+            "origin_airport": segment.get("origin_airport") or segment.get("origin"),
+            "destination_airport": segment.get("destination_airport") or segment.get("destination"),
+            "departure_date": parse_date(
+                segment.get("date")
+                or segment.get("flight_date")
+                or segment.get("departure_date")
+            ),
             "airline_code": segment.get("airline_code"),
             "flight_number": segment.get("flight_number"),
         }
