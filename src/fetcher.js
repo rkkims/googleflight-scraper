@@ -28,6 +28,7 @@ export async function runFetcher(urlObj, options = {}) {
     proxyConfiguration: await Actor.createProxyConfiguration(),
     headless: !debug,
     useSessionPool: true,
+    stealth: true, // Enable stealth mode for anti-detection
     maxRequestRetries: 4,
     maxConcurrency: 5, // Increased concurrency as we are using proxies
     navigationTimeoutSecs: 45,
