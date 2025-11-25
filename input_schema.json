@@ -36,28 +36,26 @@
       "title": "Passengers",
       "type": "object",
       "description": "Number of passengers by type.",
-      "editor": "object",
+      "editor": "json",
+      "prefill": { "adult": 1 },
       "properties": {
         "adult": {
           "title": "Adults",
           "type": "integer",
           "description": "Number of adult passengers.",
-          "default": 1,
-          "editor": "number"
+          "default": 1
         },
         "child": {
           "title": "Children",
           "type": "integer",
           "description": "Number of child passengers.",
-          "default": 0,
-          "editor": "number"
+          "default": 0
         },
         "infant": {
           "title": "Infants",
           "type": "integer",
           "description": "Number of infant passengers.",
-          "default": 0,
-          "editor": "number"
+          "default": 0
         }
       }
     },
@@ -78,7 +76,6 @@
       "type": "object",
       "description": "For multi-city or specific flight routes. Specify outbound and/or return flight segments.",
       "editor": "json",
-      "optional": true,
       "prefill": {
         "outbound": [
           {
