@@ -29,14 +29,14 @@ export async function runFetcher(urlObj, options = {}) {
     headless: !debug,
     useSessionPool: true,
     browserPoolOptions: {
-        useFingerprints: true,
-        fingerprintOptions: {
-            fingerprintGeneratorOptions: {
-                browsers: ['chrome'],
-                devices: ['desktop'],
-                operatingSystems: ['windows'],
-            },
+      useFingerprints: true,
+      fingerprintOptions: {
+        fingerprintGeneratorOptions: {
+          browsers: ["chrome"],
+          devices: ["desktop"],
+          operatingSystems: ["windows"],
         },
+      },
     },
     maxRequestRetries: 4,
     maxConcurrency: 5, // Increased concurrency as we are using proxies
@@ -45,13 +45,14 @@ export async function runFetcher(urlObj, options = {}) {
     async requestHandler({ page, request, log }) {
       // Set a more realistic user-agent. This can be randomized further if needed.
       await page.setExtraHTTPHeaders({
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
       });
-      log.info(`Fetching: ${request.url}`);
+      //log.info(`Fetching: ${request.url}`);
       await page.goto(request.url, { waitUntil: "domcontentloaded" });
 
       // --- Wait for appropriate XHR (booking or search)
-      log.info(`Waiting for XHR: ${xhrKeyword}`);
+      //log.info(`Waiting for XHR: ${xhrKeyword}`);
       await new Promise((resolve, reject) => {
         const timeoutMs = 30000;
         const startTime = Date.now();
@@ -85,7 +86,7 @@ export async function runFetcher(urlObj, options = {}) {
 
       // --- Booking page only: click "Flight details" buttons
       if (isBookingPage) {
-        log.info("Detected booking page — expanding flight detail sections...");
+        //log.info("Detected booking page — expanding flight detail sections...");
         try {
           const buttons = await page.$$(
             'button[jsname="LgbsSe"][aria-label^="Flight details"]'
@@ -95,7 +96,7 @@ export async function runFetcher(urlObj, options = {}) {
           } else {
             for (const [i, button] of buttons.entries()) {
               const label = await button.getAttribute("aria-label");
-              log.info(`Clicking detail button ${i + 1}: ${label}`);
+              //log.info(`Clicking detail button ${i + 1}: ${label}`);
               await button.scrollIntoViewIfNeeded();
               await button.click();
               await page.waitForTimeout(1500); // wait for expand animation
@@ -106,14 +107,14 @@ export async function runFetcher(urlObj, options = {}) {
           log.warn(`Error clicking flight detail buttons: ${err.message}`);
         }
       } else {
-        log.info("Detected search page — skipping detail clicks.");
+        //log.info("Detected search page — skipping detail clicks.");
       }
 
       // --- Save final HTML output
       const htmlContent = await page.content();
       const filename = `output-${id}.html`;
       fs.writeFileSync(filename, htmlContent, "utf-8");
-      log.info(`✅ HTML content saved to ${filename}`);
+      //log.info(`✅ HTML content saved to ${filename}`);
 
       result = { url: request.url, html: htmlContent };
     },
@@ -129,5 +130,3 @@ export async function runFetcher(urlObj, options = {}) {
   }
   return result;
 }
-
-
