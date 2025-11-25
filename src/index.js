@@ -38,7 +38,7 @@ function runPythonScript(scriptPath, inputData) {
 await Actor.init();
 
 const rawInput = await Actor.getInput();
-const { type, debug, ...userInput } = rawInput;
+const { type, debug, only_direct_airline_booking, ...userInput } = rawInput;
 
 try {
   // 1️⃣ Normalize the user input
@@ -69,7 +69,17 @@ try {
       type: "booking",
     });
     const fetched = await runFetcher(googleFlightsUrl, { debug });
-    const parsed = parseBookingFlights(fetched.html);
+    let parsed = parseBookingFlights(fetched.html);
+
+    if (rawInput.only_direct_airline_booking) {
+        if (parsed.flights && parsed.flights.length > 0) {
+            parsed.flights.forEach(flight => {
+                if (flight.booking_options) {
+                    flight.booking_options = flight.booking_options.filter(opt => opt.is_direct_airline);
+                }
+            });
+        }
+    }
 
     await Actor.pushData(parsed);
   } else {
@@ -157,6 +167,13 @@ try {
           });
           const bookingHtml = (await runFetcher(bookingUrl, { debug })).html;
           const bookingDetails = parseBookingFlights(bookingHtml);
+          finalResults.push(bookingDetails);
+          if (rawInput.max_results > 0 && finalResults.length >= rawInput.max_results) {
+            break; // Break inner loop
+          }
+        }
+        if (rawInput.max_results > 0 && finalResults.length >= rawInput.max_results) {
+          break; // Break outer loop
         }
       }
     } else {
@@ -179,10 +196,24 @@ try {
         const bookingHtml = (await runFetcher(bookingUrl, { debug })).html;
         const bookingDetails = parseBookingFlights(bookingHtml);
         finalResults.push(bookingDetails);
+        if (rawInput.max_results > 0 && finalResults.length >= rawInput.max_results) {
+          break; // Break loop
+        }
       }
     }
 
     if (finalResults.length > 0) {
+      if (rawInput.only_direct_airline_booking) {
+        finalResults.forEach(result => {
+          if (result.flights && result.flights.length > 0) {
+            result.flights.forEach(flight => {
+              if (flight.booking_options) {
+                flight.booking_options = flight.booking_options.filter(opt => opt.is_direct_airline);
+              }
+            });
+          }
+        });
+      }
       await Actor.pushData(finalResults);
     } else {
       console.log("No flight combinations found.");

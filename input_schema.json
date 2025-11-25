@@ -110,6 +110,19 @@
       "type": "boolean",
       "description": "If true, the browser will be visible during the run. Useful for debugging.",
       "default": false
+    },
+    "only_direct_airline_booking": {
+      "title": "Only Airline Direct Booking",
+      "type": "boolean",
+      "description": "If true, only direct booking options from the airline will be returned.",
+      "default": false
+    },
+    "max_results": {
+      "title": "Maximum Results",
+      "type": "integer",
+      "description": "The maximum number of flight combinations to return. Set to 0 for no limit.",
+      "default": 0,
+      "editor": "number"
     }
   },
   "required": [

@@ -1,6 +1,6 @@
 # Google Flights Scraper
 
-This Apify actor scrapes flight information from Google Flights. It can be used to search for one-way, round-trip, and multi-city flights, and retrieve booking details including prices, layovers, and carrier information.
+This Apify actor scrapes flight information from Google Flights. It can be used to search for one-way and round-trip flights, and retrieve booking details including prices, layovers, and carrier information.
 
 ---
 
@@ -101,7 +101,7 @@ The `passengers` object has the following structure:
 
 ### 3. Advanced Search: Fixed Flights
 
-For complex itineraries where specific flights or layovers are required, you can use the `fixed_flights` field. This is useful for multi-city trips or forcing a particular route.
+For complex itineraries where specific flights or layovers are required, you can use the fixed_flights field. This is useful for forcing a particular route or building multi-segment journeys.
 
 When `fixed_flights` is used, the `origin` and `destination` at the top level still define the overall journey's start and end points.
 
