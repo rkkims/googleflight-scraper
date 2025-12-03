@@ -117,14 +117,12 @@ export async function runFetcher(urlObj, options = {}) {
       result = { url: request.url, html: htmlContent };
     },
 
-    failedRequestHandler({ request }) {
-      console.warn(`Request ${request.url} failed after retries.`);
+    failedRequestHandler({ request, log }) {
+      log.info(`Request ${request.url} failed after retries.`);
     },
   });
 
   await crawler.run([{ url: urlStr }]);
-  if (!result) {
-    console.warn(`Request ${urlStr} failed after retries.`);
-  }
+
   return result;
 }
