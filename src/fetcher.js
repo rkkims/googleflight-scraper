@@ -123,6 +123,5 @@ export async function runFetcher(urlObj, options = {}) {
   });
 
   await crawler.run([{ url: urlStr }]);
-
   return result;
 }

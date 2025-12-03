@@ -68,17 +68,22 @@ try {
     const googleFlightsUrl = await generatGoogleFlightsURL(bookingTfs, {
       type: "booking",
     });
-    const fetched = await runFetcher(googleFlightsUrl, { debug, id: `booking-${Date.now()}` });
+    const fetched = await runFetcher(googleFlightsUrl, {
+      debug,
+      id: `booking-${Date.now()}`,
+    });
     let parsed = parseBookingFlights(fetched.html);
 
     if (rawInput.only_direct_airline_booking) {
-        if (parsed.flights && parsed.flights.length > 0) {
-            parsed.flights.forEach(flight => {
-                if (flight.booking_options) {
-                    flight.booking_options = flight.booking_options.filter(opt => opt.is_direct_airline);
-                }
-            });
-        }
+      if (parsed.flights && parsed.flights.length > 0) {
+        parsed.flights.forEach((flight) => {
+          if (flight.booking_options) {
+            flight.booking_options = flight.booking_options.filter(
+              (opt) => opt.is_direct_airline
+            );
+          }
+        });
+      }
     }
 
     await Actor.pushData(parsed);
@@ -102,9 +107,19 @@ try {
     const outboundUrl = await generatGoogleFlightsURL(outboundTfs, {
       type: "search",
     });
-    const outboundHtml = (await runFetcher(outboundUrl, { debug, id: `outbound-search-${Date.now()}` })).html;
-    const outboundFlights = parseSearchFlights(outboundHtml).flights;
-    // console.log(`Found ${outboundFlights.length} outbound flight options.`);
+    let outboundFlights = [];
+    try {
+      const outboundFetchResult = await runFetcher(outboundUrl, {
+        debug,
+        id: `outbound-search-${Date.now()}`,
+      });
+      if (outboundFetchResult?.html) {
+        outboundFlights = parseSearchFlights(outboundFetchResult.html).flights;
+      }
+    } catch (e) {
+      console.error(`Failed to fetch or parse outbound flights: ${e.message}`);
+    }
+    console.log(`Found ${outboundFlights.length} outbound flight options.`);
 
     const finalResults = [];
 
@@ -137,10 +152,23 @@ try {
         const returnUrl = await generatGoogleFlightsURL(returnTfs, {
           type: "search",
         });
-        const returnHtml = (await runFetcher(returnUrl, { debug, id: `return-search-${outboundFlights.indexOf(outboundFlight)}-${Date.now()}` })).html;
-        const returnFlights = parseSearchFlights(returnHtml).flights;
-        // console.log(`Found ${returnFlights.length} return flight options.`);
-
+        let returnFlights = [];
+        try {
+          const returnFetchResult = await runFetcher(returnUrl, {
+            debug,
+            id: `return-search-${outboundFlights.indexOf(
+              outboundFlight
+            )}-${Date.now()}`,
+          });
+          if (returnFetchResult?.html) {
+            returnFlights = parseSearchFlights(returnFetchResult.html).flights;
+          }
+        } catch (e) {
+          console.error(
+            `Failed to fetch or parse return flights: ${e.message}`
+          );
+        }
+        console.log(`Found ${returnFlights.length} return flight options.`);
         // 3. For each outbound-return pair, get the price
         // console.log(`Getting booking details for ${returnFlights.length} round-trip combinations...`);
         const bookingPromises = returnFlights.map(async (returnFlight, i) => {
@@ -165,14 +193,30 @@ try {
           const bookingUrl = await generatGoogleFlightsURL(bookingTfs, {
             type: "booking",
           });
-          const bookingHtml = (await runFetcher(bookingUrl, { debug, id: `booking-round-trip-${i}-${Date.now()}` })).html;
-          return { ...parseBookingFlights(bookingHtml), bookingUrl };
+          try {
+            const bookingFetchResult = await runFetcher(bookingUrl, {
+              debug,
+              id: `booking-round-trip-${i}-${Date.now()}`,
+            });
+            return {
+              ...parseBookingFlights(bookingFetchResult.html),
+              bookingUrl,
+            };
+          } catch (e) {
+            console.error(
+              `Failed to get booking details for a round-trip combination: ${e.message}`
+            );
+            return null; // Return null for failed attempts
+          }
         });
 
         const allBookingDetails = await Promise.all(bookingPromises);
         finalResults.push(...allBookingDetails);
-        
-        if (rawInput.max_results > 0 && finalResults.length >= rawInput.max_results) {
+
+        if (
+          rawInput.max_results > 0 &&
+          finalResults.length >= rawInput.max_results
+        ) {
           break; // Break outer loop
         }
       }
@@ -193,12 +237,25 @@ try {
         const bookingUrl = await generatGoogleFlightsURL(bookingTfs, {
           type: "booking",
         });
-        const bookingHtml = (await runFetcher(bookingUrl, { debug, id: `booking-one-way-${i}-${Date.now()}` })).html;
-        return { ...parseBookingFlights(bookingHtml), bookingUrl };
+        try {
+          const bookingFetchResult = await runFetcher(bookingUrl, {
+            debug,
+            id: `booking-one-way-${i}-${Date.now()}`,
+          });
+          return {
+            ...parseBookingFlights(bookingFetchResult.html),
+            bookingUrl,
+          };
+        } catch (e) {
+          console.error(
+            `Failed to get booking details for a one-way flight: ${e.message}`
+          );
+          return null; // Return null for failed attempts
+        }
       });
 
       let allBookingDetails = await Promise.all(bookingPromises);
-      
+
       if (rawInput.max_results > 0) {
         allBookingDetails = allBookingDetails.slice(0, rawInput.max_results);
       }
@@ -208,11 +265,13 @@ try {
 
     if (finalResults.length > 0) {
       if (rawInput.only_direct_airline_booking) {
-        finalResults.forEach(result => {
+        finalResults.forEach((result) => {
           if (result.flights && result.flights.length > 0) {
-            result.flights.forEach(flight => {
+            result.flights.forEach((flight) => {
               if (flight.booking_options) {
-                flight.booking_options = flight.booking_options.filter(opt => opt.is_direct_airline);
+                flight.booking_options = flight.booking_options.filter(
+                  (opt) => opt.is_direct_airline
+                );
               }
             });
           }
