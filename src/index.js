@@ -281,6 +281,7 @@ try {
           }
         });
       }
+      console.log(finalResults);
       await Actor.pushData(finalResults);
     } else {
       // console.log("No flight combinations found.");
