@@ -210,8 +210,10 @@ try {
           }
         });
 
-        const allBookingDetails = await Promise.all(bookingPromises);
-        finalResults.push(...allBookingDetails);
+        const allBookingDetails = (await Promise.all(bookingPromises)).filter(
+          Boolean
+        );
+        finalResults.push(...allBookingDetails.filter(Boolean));
 
         if (
           rawInput.max_results > 0 &&
@@ -254,13 +256,15 @@ try {
         }
       });
 
-      let allBookingDetails = await Promise.all(bookingPromises);
+      let allBookingDetails = (await Promise.all(bookingPromises)).filter(
+        Boolean
+      );
 
       if (rawInput.max_results > 0) {
         allBookingDetails = allBookingDetails.slice(0, rawInput.max_results);
       }
 
-      finalResults.push(...allBookingDetails);
+      finalResults.push(...allBookingDetails.filter(Boolean));
     }
 
     if (finalResults.length > 0) {
