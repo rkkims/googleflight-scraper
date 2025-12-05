@@ -198,10 +198,12 @@ try {
               debug,
               id: `booking-round-trip-${i}-${Date.now()}`,
             });
-            return {
-              ...parseBookingFlights(bookingFetchResult.html),
+            const parsed = parseBookingFlights(bookingFetchResult.html);
+            // Return each flight with the bookingUrl
+            return parsed.flights.map((flight) => ({
+              ...flight,
               bookingUrl,
-            };
+            }));
           } catch (e) {
             console.error(
               `Failed to get booking details for a round-trip combination: ${e.message}`
@@ -211,9 +213,9 @@ try {
         });
 
         const allBookingDetails = (await Promise.all(bookingPromises)).filter(
-          Boolean
+          (result) => result && result.length > 0
         );
-        finalResults.push(...allBookingDetails.filter(Boolean));
+        finalResults.push(...allBookingDetails.flat());
 
         if (
           rawInput.max_results > 0 &&
@@ -244,10 +246,12 @@ try {
             debug,
             id: `booking-one-way-${i}-${Date.now()}`,
           });
-          return {
-            ...parseBookingFlights(bookingFetchResult.html),
+          const parsed = parseBookingFlights(bookingFetchResult.html);
+          // Return each flight with the bookingUrl
+          return parsed.flights.map((flight) => ({
+            ...flight,
             bookingUrl,
-          };
+          }));
         } catch (e) {
           console.error(
             `Failed to get booking details for a one-way flight: ${e.message}`
@@ -257,27 +261,23 @@ try {
       });
 
       let allBookingDetails = (await Promise.all(bookingPromises)).filter(
-        Boolean
+        (result) => result && result.length > 0
       );
 
       if (rawInput.max_results > 0) {
         allBookingDetails = allBookingDetails.slice(0, rawInput.max_results);
       }
 
-      finalResults.push(...allBookingDetails.filter(Boolean));
+      finalResults.push(...allBookingDetails.flat());
     }
 
     if (finalResults.length > 0) {
       if (rawInput.only_direct_airline_booking) {
-        finalResults.forEach((result) => {
-          if (result.flights && result.flights.length > 0) {
-            result.flights.forEach((flight) => {
-              if (flight.booking_options) {
-                flight.booking_options = flight.booking_options.filter(
-                  (opt) => opt.is_direct_airline
-                );
-              }
-            });
+        finalResults.forEach((flight) => {
+          if (flight.booking_options) {
+            flight.booking_options = flight.booking_options.filter(
+              (opt) => opt.is_direct_airline
+            );
           }
         });
       }
