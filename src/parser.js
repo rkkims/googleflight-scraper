@@ -146,7 +146,7 @@ export function parseBookingFlights(html) {
     const name = $(link).find("div.ogfYpf.AdWm1c").text().trim();
     if (name.startsWith("Call ")) return;
 
-    const price = $(link).find("div.BWTl3e > div.CQYfx").text().trim() || null;
+    const price = $(link).find("div.ScwYP").text().trim() || null;
 
     const isAirline = $(link).find("div.sSHqwe.wZlgrf.EA71Tc").length != 0;
 
@@ -165,5 +165,3 @@ export function parseBookingFlights(html) {
 
   return { flights };
 }
-
-

@@ -171,7 +171,20 @@ In this example, the user wants to fly from YVR to NRT via HKG on the way out, a
 
 ---
 
-### 4. Error Handling
+### 4. Configuration Options
+
+These additional fields control the scraper's behavior and output filtering.
+
+| Field                         | Type    | Description                                                                                     | Default  |
+| :---------------------------- | :------ | :---------------------------------------------------------------------------------------------- | :------- |
+| `max_results`                 | Integer | The maximum number of flight combinations to return. Set to `0` for no limit.                   | `0`      |
+| `only_direct_airline_booking` | Boolean | If `true`, the results will only include booking options directly from the airline, excluding OTAs. | `false`  |
+| `type`                        | String  | The scraping mode. Use `"search"` for standard flight search or `"booking"` for specific flights.| `"search"`|
+| `debug`                       | Boolean | If `true`, runs the browser in headful mode for debugging purposes.                             | `false`  |
+
+---
+
+### 5. Error Handling
 
 The system will raise an error if the input is invalid. Common errors include:
 
@@ -183,9 +196,58 @@ The system will raise an error if the input is invalid. Common errors include:
 
 ## Actor Output
 
-The actor stores its results in the default dataset. The output is a JSON object with the following structure:
+The actor stores its results in the default dataset. The output is a **flattened JSON array**, where each object represents a unique combination of a flight itinerary and a booking option. This means if a single flight has 3 different booking agents (e.g., Airline, Expedia, CheapOair), it will appear as 3 separate entries in the dataset, each with the same flight details but different `price`, `agent`, and `bookingUrl`.
 
-**(TODO: Add a sample output JSON object here)**
+### Sample Output
+
+```json
+[
+  {
+    "segments": [
+      {
+        "origin": "YVR",
+        "destination": "SFO",
+        "departure_time": "7:00 AM",
+        "arrival_time": "9:38 AM",
+        "airline": "United",
+        "flight_code": "UA 2322",
+        "seat_class": "Economy",
+        "aircraft": "Airbus A320",
+        "duration": "2 hr 38 min"
+      }
+    ],
+    "total_duration": "2 hr 38 min",
+    "layovers": [ "Nonstop" ],
+    "amenities": {},
+    "bookingUrl": "https://www.google.com/travel/flights/booking?tfs=...",
+    "price": "CA$353",
+    "agent": "Book with UnitedAirline",
+    "is_direct_airline": true
+  },
+  {
+    "segments": [
+      {
+        "origin": "YVR",
+        "destination": "SFO",
+        "departure_time": "7:00 AM",
+        "arrival_time": "9:38 AM",
+        "airline": "United",
+        "flight_code": "UA 2322",
+        "seat_class": "Economy",
+        "aircraft": "Airbus A320",
+        "duration": "2 hr 38 min"
+      }
+    ],
+    "total_duration": "2 hr 38 min",
+    "layovers": [ "Nonstop" ],
+    "amenities": {},
+    "bookingUrl": "https://www.google.com/travel/flights/booking?tfs=...",
+    "price": "CA$332",
+    "agent": "Book with Air CanadaAirline",
+    "is_direct_airline": true
+  }
+]
+```
 
 ---
 

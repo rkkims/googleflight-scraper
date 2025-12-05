@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from typing import Any, Dict, List
 
 
@@ -29,8 +29,21 @@ def normalize_input(raw: Dict[str, Any]) -> Dict[str, Any]:
     if not origin or not destination:
         raise ValueError("Missing required origin or destination airport code.")
 
-    departure_date = parse_date(raw.get("departure_date"))
-    return_date = parse_date(raw.get("return_date"))
+    departure_date_str = parse_date(raw.get("departure_date"))
+    return_date_str = parse_date(raw.get("return_date"))
+    
+    if departure_date_str:
+        dep_dt = datetime.strptime(departure_date_str, "%Y-%m-%d").date()
+        if dep_dt < date.today():
+             raise ValueError(f"Departure date {departure_date_str} cannot be in the past.")
+        
+        if return_date_str:
+            ret_dt = datetime.strptime(return_date_str, "%Y-%m-%d").date()
+            if ret_dt < dep_dt:
+                 raise ValueError(f"Return date {return_date_str} cannot be before departure date {departure_date_str}.")
+
+    departure_date = departure_date_str
+    return_date = return_date_str
 
     # --- Infer trip type ---
     if "trip" in raw:

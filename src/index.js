@@ -200,10 +200,23 @@ try {
             });
             const parsed = parseBookingFlights(bookingFetchResult.html);
             // Return each flight with the bookingUrl
-            return parsed.flights.map((flight) => ({
-              ...flight,
-              bookingUrl,
-            }));
+            return parsed.flights.flatMap((flight) => {
+              if (flight.booking_options && flight.booking_options.length > 0) {
+                return flight.booking_options.map((option) => {
+                  const { booking_options, ...flightData } = flight;
+                  return {
+                    ...flightData,
+                    bookingUrl,
+                    price: option.price
+                      ? option.price.replace(/^from\s*/, "").trim()
+                      : null,
+                    agent: option.name ? option.name.replace(/^Book with\s*/, '').trim() : null,
+                    is_direct_airline: option.is_direct_airline,
+                  };
+                });
+              }
+              return [];
+            });
           } catch (e) {
             console.error(
               `Failed to get booking details for a round-trip combination: ${e.message}`
@@ -248,10 +261,23 @@ try {
           });
           const parsed = parseBookingFlights(bookingFetchResult.html);
           // Return each flight with the bookingUrl
-          return parsed.flights.map((flight) => ({
-            ...flight,
-            bookingUrl,
-          }));
+          return parsed.flights.flatMap((flight) => {
+            if (flight.booking_options && flight.booking_options.length > 0) {
+              return flight.booking_options.map((option) => {
+                const { booking_options, ...flightData } = flight;
+                return {
+                  ...flightData,
+                  bookingUrl,
+                  price: option.price
+                    ? option.price.replace(/^from\s*/, "").trim()
+                    : null,
+                  agent: option.name ? option.name.replace(/^Book with\s*/, '').trim() : null,
+                  is_direct_airline: option.is_direct_airline,
+                };
+              });
+            }
+            return [];
+          });
         } catch (e) {
           console.error(
             `Failed to get booking details for a one-way flight: ${e.message}`
@@ -272,17 +298,11 @@ try {
     }
 
     if (finalResults.length > 0) {
+      let output = finalResults;
       if (rawInput.only_direct_airline_booking) {
-        finalResults.forEach((flight) => {
-          if (flight.booking_options) {
-            flight.booking_options = flight.booking_options.filter(
-              (opt) => opt.is_direct_airline
-            );
-          }
-        });
+        output = output.filter((flight) => flight.is_direct_airline);
       }
-      console.log(finalResults);
-      await Actor.pushData(finalResults);
+      await Actor.pushData(output);
     } else {
       // console.log("No flight combinations found.");
       await Actor.pushData([]);
