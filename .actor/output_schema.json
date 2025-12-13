@@ -1,0 +1,11 @@
+{
+    "actorOutputSchemaVersion": 1,
+    "title": "Output schema of Google Flights scraper",
+    "properties": {
+        "results": {
+            "type": "string",
+            "title": "Results",
+            "template": "{{links.apiDefaultDatasetUrl}}/items"
+        }
+    }
+}
