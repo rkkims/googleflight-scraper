@@ -3,3 +3,5 @@
 /output.html
 /storage
 /venv
+/tests/test_storage
+/src/serializer/__pycache__

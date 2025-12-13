@@ -146,7 +146,7 @@ export function parseBookingFlights(html) {
     const name = $(link).find("div.ogfYpf.AdWm1c").text().trim();
     if (name.startsWith("Call ")) return;
 
-    const price = $(link).find("div.ScwYP").text().trim() || null;
+    const price = $(link).find("div.ScwYP").text().replace(/^from\s+/i, "").trim() || null;
 
     const isAirline = $(link).find("div.sSHqwe.wZlgrf.EA71Tc").length != 0;
 
@@ -157,10 +157,11 @@ export function parseBookingFlights(html) {
     });
   });
 
-  // If there is one flight and multiple booking options,
-  // attach the booking options to that flight.
-  if (flights.length === 1 && bookingOptions.length > 0) {
-    flights[0].booking_options = bookingOptions;
+  // Attach booking options to all flights
+  if (bookingOptions.length > 0) {
+    flights.forEach((flight) => {
+      flight.booking_options = bookingOptions;
+    });
   }
 
   return { flights };

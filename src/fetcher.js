@@ -1,4 +1,4 @@
-import { PlaywrightCrawler } from "crawlee";
+import { PlaywrightCrawler, RequestQueue } from "crawlee";
 import { Actor } from "apify";
 import fs from "fs";
 
@@ -25,6 +25,7 @@ export async function runFetcher(urlObj, options = {}) {
   let result = null;
 
   const crawler = new PlaywrightCrawler({
+    requestQueue: await RequestQueue.open(`queue-${id}`),
     proxyConfiguration: await Actor.createProxyConfiguration(),
     headless: !debug,
     useSessionPool: true,
@@ -101,6 +102,13 @@ export async function runFetcher(urlObj, options = {}) {
             }
             await page.waitForTimeout(2000); // wait for all details to render
           }
+
+          const hideButtons = await page.$$('button:has(span:has-text("Hide options"))');
+          for (const button of hideButtons) {
+            await button.scrollIntoViewIfNeeded();
+            await button.click();
+            await page.waitForTimeout(1000);
+          }
         } catch (err) {
           log.warn(`Error clicking flight detail buttons: ${err.message}`);
         }
@@ -115,6 +123,7 @@ export async function runFetcher(urlObj, options = {}) {
       //log.info(`✅ HTML content saved to ${filename}`);
 
       result = { url: request.url, html: htmlContent };
+      fs.unlinkSync(filename); // Delete the temporary file
     },
 
     failedRequestHandler({ request, log }) {

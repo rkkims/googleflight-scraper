@@ -37,7 +37,9 @@
       "type": "object",
       "description": "Number of passengers by type.",
       "editor": "json",
-      "prefill": { "adult": 1 },
+      "prefill": {
+        "adult": 1
+      },
       "properties": {
         "adult": {
           "title": "Adults",
@@ -123,6 +125,20 @@
       "type": "integer",
       "description": "The maximum number of flight combinations to return. Set to 0 for no limit.",
       "default": 0,
+      "editor": "number"
+    },
+    "max_outbound_flight_limit": {
+      "title": "Max Outbound Flight Limit",
+      "type": "integer",
+      "description": "Limit the number of outbound flights processed to reduce crawling. Set to 0 for no limit.",
+      "default": 1,
+      "editor": "number"
+    },
+    "max_return_flight_limit": {
+      "title": "Max Return Flight Limit",
+      "type": "integer",
+      "description": "Limit the number of return flights processed (per outbound flight) to reduce crawling. Set to 0 for no limit.",
+      "default": 1,
       "editor": "number"
     }
   },

@@ -121,6 +121,12 @@ try {
     }
     console.log(`Found ${outboundFlights.length} outbound flight options.`);
 
+    // Apply limit to outbound flights if specified
+    if (rawInput.max_outbound_flight_limit && rawInput.max_outbound_flight_limit > 0) {
+      console.log(`Limiting outbound flights to ${rawInput.max_outbound_flight_limit} options.`);
+      outboundFlights = outboundFlights.slice(0, rawInput.max_outbound_flight_limit);
+    }
+
     const finalResults = [];
 
     if (
@@ -169,6 +175,13 @@ try {
           );
         }
         console.log(`Found ${returnFlights.length} return flight options.`);
+
+        // Apply limit to return flights if specified
+        if (rawInput.max_return_flight_limit && rawInput.max_return_flight_limit > 0) {
+          console.log(`Limiting return flights to ${rawInput.max_return_flight_limit} options.`);
+          returnFlights = returnFlights.slice(0, rawInput.max_return_flight_limit);
+        }
+
         // 3. For each outbound-return pair, get the price
         // console.log(`Getting booking details for ${returnFlights.length} round-trip combinations...`);
         const bookingPromises = returnFlights.map(async (returnFlight, i) => {
