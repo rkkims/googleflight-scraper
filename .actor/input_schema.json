@@ -78,25 +78,7 @@
       "type": "object",
       "description": "For multi-city or specific flight routes. Specify outbound and/or return flight segments.",
       "editor": "json",
-      "prefill": {
-        "outbound": [
-          {
-            "origin_airport": "YVR",
-            "destination_airport": "HKG",
-            "date": "2025-12-03",
-            "airline_code": "HX",
-            "flight_number": "81"
-          },
-          {
-            "origin_airport": "HKG",
-            "destination_airport": "NRT",
-            "date": "2025-12-04",
-            "airline_code": "HX",
-            "flight_number": "604"
-          }
-        ],
-        "return": []
-      }
+      "prefill": {}
     },
     "type": {
       "title": "Page Type",
