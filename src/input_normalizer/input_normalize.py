@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from typing import Any, Dict, List
 
 
@@ -32,15 +32,25 @@ def normalize_input(raw: Dict[str, Any]) -> Dict[str, Any]:
     departure_date_str = parse_date(raw.get("departure_date"))
     return_date_str = parse_date(raw.get("return_date"))
     
-    if departure_date_str:
+    # --- Fallback logic for expired or missing dates ---
+    today = date.today()
+    
+    if not departure_date_str:
+        # Default to 30 days from now if missing
+        departure_date_str = (today + timedelta(days=30)).strftime("%Y-%m-%d")
+    else:
         dep_dt = datetime.strptime(departure_date_str, "%Y-%m-%d").date()
-        if dep_dt < date.today():
-             raise ValueError(f"Departure date {departure_date_str} cannot be in the past.")
+        if dep_dt < today:
+             # Shift to 30 days from now if in the past
+             departure_date_str = (today + timedelta(days=30)).strftime("%Y-%m-%d")
         
-        if return_date_str:
-            ret_dt = datetime.strptime(return_date_str, "%Y-%m-%d").date()
-            if ret_dt < dep_dt:
-                 raise ValueError(f"Return date {return_date_str} cannot be before departure date {departure_date_str}.")
+    if return_date_str:
+        ret_dt = datetime.strptime(return_date_str, "%Y-%m-%d").date()
+        dep_dt = datetime.strptime(departure_date_str, "%Y-%m-%d").date()
+        if ret_dt < dep_dt:
+             # Shift return date if it's before departure
+             return_date_str = (dep_dt + timedelta(days=7)).strftime("%Y-%m-%d")
+    # ---------------------------------------------------
 
     departure_date = departure_date_str
     return_date = return_date_str

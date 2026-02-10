@@ -1,0 +1,25 @@
+name: Update Sample Dates
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs every day at midnight
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  update-dates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout:v4
+      - uses: actions/setup-node:v4
+        with:
+          node-version: 20
+      
+      - name: Update dates
+        run: node scripts/update_dates.js
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add sample_input.json .actor/input_schema.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update sample flight dates [skip ci]" && git push)

@@ -24,10 +24,10 @@ const rawInput = fs.readFileSync(sampleInputPath, 'utf8');
 const input = JSON.parse(rawInput);
 
 // Add required fields and test fields
-input.type = 'search';
-input.max_outbound_flight_limit = 2;
-input.max_return_flight_limit = 2;
-input.debug = false; 
+input.type = input.type ?? 'search';
+input.max_outbound_flight_limit = input.max_outbound_flight_limit ?? 2;
+input.max_return_flight_limit = input.max_return_flight_limit ?? 2;
+input.debug = input.debug ?? false; 
 
 // Write INPUT.json
 fs.writeFileSync(path.join(kvStoreDir, 'INPUT.json'), JSON.stringify(input, null, 2));
@@ -61,10 +61,11 @@ child.on('close', (code) => {
       const files = fs.readdirSync(datasetDir);
       if (files.length > 0) {
         console.log(`Success! Found ${files.length} items in the dataset.`);
-        // Optional: print the first result
-        const firstFile = path.join(datasetDir, files[0]);
-        const result = fs.readFileSync(firstFile, 'utf8');
-        console.log('Sample result:', result.substring(0, 500) + '...');
+        files.forEach((file) => {
+          const filePath = path.join(datasetDir, file);
+          const result = fs.readFileSync(filePath, 'utf8');
+          console.log(`Result from ${file}:`, result);
+        });
       } else {
         console.warn('Warning: Dataset directory exists but is empty.');
       }

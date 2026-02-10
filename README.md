@@ -178,6 +178,8 @@ These additional fields control the scraper's behavior and output filtering.
 | Field                         | Type    | Description                                                                                     | Default  |
 | :---------------------------- | :------ | :---------------------------------------------------------------------------------------------- | :------- |
 | `max_results`                 | Integer | The maximum number of flight combinations to return. Set to `0` for no limit.                   | `0`      |
+| `max_outbound_flight_limit`   | Integer | The maximum number of outbound flights to consider during search. Useful for reducing search space.| `1`      |
+| `max_return_flight_limit`     | Integer | The maximum number of return flights to consider for each outbound flight option.               | `1`      |
 | `only_direct_airline_booking` | Boolean | If `true`, the results will only include booking options directly from the airline, excluding OTAs. | `false`  |
 | `type`                        | String  | The scraping mode. Use `"search"` for standard flight search or `"booking"` for specific flights.| `"search"`|
 | `debug`                       | Boolean | If `true`, runs the browser in headful mode for debugging purposes.                             | `false`  |

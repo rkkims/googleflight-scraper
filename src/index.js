@@ -1,5 +1,6 @@
 import { Actor } from "apify";
 import { spawn } from "child_process";
+import fs from "fs";
 import { runFetcher } from "./fetcher.js"; // Path updated for src directory
 import { parseBookingFlights, parseSearchFlights } from "./parser.js"; // Path updated for src directory
 import { generatGoogleFlightsURL } from "./url_generator.js"; // Path updated for src directory
@@ -12,7 +13,12 @@ import { generatGoogleFlightsURL } from "./url_generator.js"; // Path updated fo
  */
 function runPythonScript(scriptPath, inputData) {
   return new Promise((resolve, reject) => {
-    const pythonProcess = spawn("python3", [scriptPath]);
+    // Try to use the virtual environment's python if it exists
+    const pythonExecutable = fs.existsSync("./.venv/bin/python3")
+      ? "./.venv/bin/python3"
+      : "python3";
+
+    const pythonProcess = spawn(pythonExecutable, [scriptPath]);
     let stdout = "";
     let stderr = "";
 

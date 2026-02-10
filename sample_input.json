@@ -1,11 +1,14 @@
 {
   "origin": "YVR",
   "destination": "SFO",
-  "departure_date": "2025-12-24",
-  "return_date": "2025-12-31",
+  "departure_date": "2026-03-12",
+  "return_date": "2026-03-19",
   "passengers": {
     "adult": 1
   },
   "seat": "economy",
+  "only_direct_airline_booking": true,
+  "max_outbound_flight_limit": 1,
+  "max_return_flight_limit": 1,
   "debug": false
 }

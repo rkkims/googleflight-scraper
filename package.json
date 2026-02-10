@@ -8,7 +8,8 @@
   },
   "scripts": {
     "start": "node src/index.js",
-    "test": "node tests/run_test.js"
+    "test": "node tests/run_test.js",
+    "update-dates": "node scripts/update_dates.js"
   },
   "keywords": [],
   "author": "",
