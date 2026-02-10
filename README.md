@@ -223,7 +223,7 @@ The actor stores its results in the default dataset. The output is a **flattened
     "amenities": {},
     "bookingUrl": "https://www.google.com/travel/flights/booking?tfs=...",
     "price": "CA$353",
-    "agent": "Book with UnitedAirline",
+    "agent": "United",
     "is_direct_airline": true
   },
   {
@@ -245,7 +245,7 @@ The actor stores its results in the default dataset. The output is a **flattened
     "amenities": {},
     "bookingUrl": "https://www.google.com/travel/flights/booking?tfs=...",
     "price": "CA$332",
-    "agent": "Book with Air CanadaAirline",
+    "agent": "Air Canada",
     "is_direct_airline": true
   }
 ]
