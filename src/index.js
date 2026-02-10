@@ -229,7 +229,7 @@ try {
                     price: option.price
                       ? option.price.replace(/^from\s*/, "").trim()
                       : null,
-                    agent: option.name ? option.name.replace(/^Book with\s*/, '').trim() : null,
+                    agent: option.name ? option.name.replace(/^Book with\s*/, "").replace(/Airline$/, "").trim() : null,
                     is_direct_airline: option.is_direct_airline,
                   };
                 });
@@ -290,7 +290,7 @@ try {
                   price: option.price
                     ? option.price.replace(/^from\s*/, "").trim()
                     : null,
-                  agent: option.name ? option.name.replace(/^Book with\s*/, '').trim() : null,
+                  agent: option.name ? option.name.replace(/^Book with\s*/, "").replace(/Airline$/, "").trim() : null,
                   is_direct_airline: option.is_direct_airline,
                 };
               });
