@@ -80,16 +80,6 @@
       "editor": "json",
       "prefill": {}
     },
-    "type": {
-      "title": "Page Type",
-      "type": "string",
-      "description": "The type of Google Flights page to scrape.",
-      "enum": [
-        "search",
-        "booking"
-      ],
-      "default": "search"
-    },
     "debug": {
       "title": "Debug Mode",
       "type": "boolean",
@@ -127,7 +117,6 @@
   "required": [
     "origin",
     "destination",
-    "departure_date",
-    "type"
+    "departure_date"
   ]
 }
