@@ -8,7 +8,7 @@
   },
   "seat": "economy",
   "only_direct_airline_booking": true,
-  "max_outbound_flight_limit": 1,
-  "max_return_flight_limit": 1,
+  "max_outbound_flight_limit": 3,
+  "max_return_flight_limit": 3,
   "debug": false
 }

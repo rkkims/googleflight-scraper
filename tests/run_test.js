@@ -24,8 +24,8 @@ const rawInput = fs.readFileSync(sampleInputPath, 'utf8');
 const input = JSON.parse(rawInput);
 
 // Add required fields and test fields
-input.max_outbound_flight_limit = input.max_outbound_flight_limit ?? 2;
-input.max_return_flight_limit = input.max_return_flight_limit ?? 2;
+input.max_outbound_flight_limit = input.max_outbound_flight_limit ?? 3;
+input.max_return_flight_limit = input.max_return_flight_limit ?? 3;
 input.debug = input.debug ?? false; 
 
 // Write INPUT.json

@@ -103,14 +103,14 @@
       "title": "Max Outbound Flight Limit",
       "type": "integer",
       "description": "Limit the number of outbound flights processed to reduce crawling. Set to 0 for no limit.",
-      "default": 1,
+      "default": 3,
       "editor": "number"
     },
     "max_return_flight_limit": {
       "title": "Max Return Flight Limit",
       "type": "integer",
       "description": "Limit the number of return flights processed (per outbound flight) to reduce crawling. Set to 0 for no limit.",
-      "default": 1,
+      "default": 3,
       "editor": "number"
     }
   },
