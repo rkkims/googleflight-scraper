@@ -26,6 +26,7 @@ const input = JSON.parse(rawInput);
 // Add required fields and test fields
 input.max_outbound_flight_limit = input.max_outbound_flight_limit ?? 3;
 input.max_return_flight_limit = input.max_return_flight_limit ?? 3;
+input.max_crawler_runtime_secs = input.max_crawler_runtime_secs ?? 60;
 input.debug = input.debug ?? false; 
 
 // Write INPUT.json

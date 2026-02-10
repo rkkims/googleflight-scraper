@@ -112,6 +112,13 @@
       "description": "Limit the number of return flights processed (per outbound flight) to reduce crawling. Set to 0 for no limit.",
       "default": 3,
       "editor": "number"
+    },
+    "max_crawler_runtime_secs": {
+      "title": "Max Crawler Runtime (Seconds)",
+      "type": "integer",
+      "description": "The maximum time allowed for a single browser fetch operation. Default is 60 seconds.",
+      "default": 60,
+      "editor": "number"
     }
   },
   "required": [

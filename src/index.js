@@ -44,7 +44,7 @@ function runPythonScript(scriptPath, inputData) {
 await Actor.init();
 
 const rawInput = await Actor.getInput();
-const { debug, only_direct_airline_booking, ...userInput } = rawInput;
+const { debug, only_direct_airline_booking, max_crawler_runtime_secs = 60, ...userInput } = rawInput;
 
 try {
   // 1️⃣ Normalize the user input
@@ -75,6 +75,7 @@ try {
     const outboundFetchResult = await runFetcher(outboundUrl, {
       debug,
       id: `outbound-search-${Date.now()}`,
+      max_crawler_runtime_secs,
     });
     if (outboundFetchResult?.html) {
       outboundFlights = parseSearchFlights(outboundFetchResult.html).flights;
@@ -127,6 +128,7 @@ try {
           id: `return-search-${outboundFlights.indexOf(
             outboundFlight
           )}-${Date.now()}`,
+          max_crawler_runtime_secs,
         });
         if (returnFetchResult?.html) {
           returnFlights = parseSearchFlights(returnFetchResult.html).flights;
@@ -171,6 +173,7 @@ try {
           const bookingFetchResult = await runFetcher(bookingUrl, {
             debug,
             id: `booking-round-trip-${i}-${Date.now()}`,
+            max_crawler_runtime_secs,
           });
           const parsed = parseBookingFlights(bookingFetchResult.html);
           // Return each flight with the bookingUrl
@@ -231,6 +234,7 @@ try {
         const bookingFetchResult = await runFetcher(bookingUrl, {
           debug,
           id: `booking-one-way-${i}-${Date.now()}`,
+          max_crawler_runtime_secs,
         });
         const parsed = parseBookingFlights(bookingFetchResult.html);
         // Return each flight with the bookingUrl

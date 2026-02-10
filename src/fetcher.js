@@ -18,7 +18,7 @@ export async function runFetcher(urlObj, options = {}) {
   if (!(urlObj instanceof URL))
     throw new TypeError("runFetcher expects a URL object.");
 
-  const { debug = false, id = Date.now() } = options;
+  const { debug = false, id = Date.now(), max_crawler_runtime_secs = 60 } = options;
   const urlStr = urlObj.href;
   const isBookingPage = urlStr.includes("/flights/booking?tfs=");
   const xhrKeyword = isBookingPage ? "GetBookingResults" : "GetShoppingResults";
@@ -41,7 +41,8 @@ export async function runFetcher(urlObj, options = {}) {
     },
     maxRequestRetries: 4,
     maxConcurrency: 5, // Increased concurrency as we are using proxies
-    navigationTimeoutSecs: 45,
+    navigationTimeoutSecs: Math.min(45, max_crawler_runtime_secs),
+    requestHandlerTimeoutSecs: max_crawler_runtime_secs,
 
     async requestHandler({ page, request, log }) {
       // Set a more realistic user-agent. This can be randomized further if needed.
@@ -55,7 +56,8 @@ export async function runFetcher(urlObj, options = {}) {
       // --- Wait for appropriate XHR (booking or search)
       //log.info(`Waiting for XHR: ${xhrKeyword}`);
       await new Promise((resolve, reject) => {
-        const timeoutMs = 30000;
+        // Leave some buffer for other operations (clicking buttons, etc.)
+        const timeoutMs = (max_crawler_runtime_secs * 1000) - 5000;
         const startTime = Date.now();
 
         const onResponse = async (response) => {
@@ -78,7 +80,7 @@ export async function runFetcher(urlObj, options = {}) {
           if (Date.now() - startTime > timeoutMs) {
             page.off("response", onResponse);
             clearInterval(timer);
-            reject(new Error(`Timeout waiting for a request`));
+            reject(new Error(`Timeout waiting for a request after ${timeoutMs}ms`));
           }
         }, 100);
       });

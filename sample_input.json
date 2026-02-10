@@ -10,5 +10,6 @@
   "only_direct_airline_booking": true,
   "max_outbound_flight_limit": 3,
   "max_return_flight_limit": 3,
+  "max_crawler_runtime_secs": 60,
   "debug": false
 }
