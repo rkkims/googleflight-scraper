@@ -30,37 +30,14 @@ router.addHandler("SEARCH", async ({ page, request, log, crawler }) => {
     log.info("Max results reached, skipping search.");
     return;
   }
-  const { type, outboundFlight, iteration } = request.userData;
-  const isBookingPage = request.url.includes("/flights/booking?tfs=");
-  const xhrKeyword = isBookingPage ? "GetBookingResults" : "GetShoppingResults";
+  const { type, outboundFlight } = request.userData;
+  const xhrKeyword = request.url.includes("/flights/booking?tfs=") ? "GetBookingResults" : "GetShoppingResults";
+  const timeoutMs = (max_crawler_runtime_secs * 1000) - 5000;
 
   log.info(`Processing ${type} search: ${request.url}`);
 
   // Wait for appropriate XHR
-  await new Promise((resolve, reject) => {
-    const timeoutMs = (max_crawler_runtime_secs * 1000) - 5000;
-    const startTime = Date.now();
-    const onResponse = async (response) => {
-      if (response.url().includes(xhrKeyword)) {
-        try {
-          await response.json();
-          page.off("response", onResponse);
-          resolve();
-        } catch {
-          page.off("response", onResponse);
-          resolve();
-        }
-      }
-    };
-    page.on("response", onResponse);
-    const timer = setInterval(() => {
-      if (Date.now() - startTime > timeoutMs) {
-        page.off("response", onResponse);
-        clearInterval(timer);
-        resolve(); // Resolve anyway to try parsing what we have
-      }
-    }, 100);
-  });
+  await page.waitForResponse((r) => r.url().includes(xhrKeyword), { timeout: timeoutMs }).catch(() => {});
 
   const html = await page.content();
   const { flights } = parseSearchFlights(html);
@@ -72,7 +49,7 @@ router.addHandler("SEARCH", async ({ page, request, log, crawler }) => {
       outboundFlights = outboundFlights.slice(0, max_outbound_flight_limit);
     }
 
-    for (const [i, flight] of outboundFlights.entries()) {
+    for (const flight of outboundFlights) {
       if (max_results > 0 && resultsCount >= max_results) break;
       if (normalizedInput.trip_type === "trip_type_round") {
         // Prepare return search
@@ -87,7 +64,7 @@ router.addHandler("SEARCH", async ({ page, request, log, crawler }) => {
         await crawler.addRequests([{
           url: returnUrl.toString(),
           label: "SEARCH",
-          userData: { type: "RETURN", outboundFlight: flight, iteration: i },
+          userData: { type: "RETURN", outboundFlight: flight },
         }]);
       } else {
         // One-way: go to booking
@@ -137,21 +114,8 @@ router.addHandler("BOOKING", async ({ page, request, log }) => {
   log.info(`Processing booking page: ${request.url}`);
 
   // Wait for booking XHR
-  await new Promise((resolve) => {
-    const timeoutMs = (max_crawler_runtime_secs * 1000) - 5000;
-    const startTime = Date.now();
-    const onResponse = async (response) => {
-      if (response.url().includes("GetBookingResults")) {
-        page.off("response", onResponse);
-        resolve();
-      }
-    };
-    page.on("response", onResponse);
-    setTimeout(() => {
-      page.off("response", onResponse);
-      resolve();
-    }, timeoutMs);
-  });
+  const timeoutMs = (max_crawler_runtime_secs * 1000) - 5000;
+  await page.waitForResponse((r) => r.url().includes("GetBookingResults"), { timeout: timeoutMs }).catch(() => {});
 
   // Expand details
   try {
