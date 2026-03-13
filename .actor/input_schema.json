@@ -74,9 +74,9 @@
       "default": "economy"
     },
     "fixed_flights": {
-      "title": "Fixed Flights (Advanced)",
+      "title": "Fixed Flights",
       "type": "object",
-      "description": "For multi-city or specific flight routes. Specify outbound and/or return flight segments.",
+      "description": "Specify exact flight segments to check prices for. If all outbound segments include 'airline_code' and 'flight_number', the actor enters price-check mode and goes directly to the booking page — skipping the search phase entirely. Example: {\"outbound\": [{\"origin_airport\": \"YVR\", \"destination_airport\": \"SFO\", \"departure_date\": \"2026-04-12\", \"airline_code\": \"UA\", \"flight_number\": \"2322\"}], \"return\": [{\"origin_airport\": \"SFO\", \"destination_airport\": \"YVR\", \"departure_date\": \"2026-04-19\", \"airline_code\": \"UA\", \"flight_number\": \"2429\"}]}",
       "editor": "json",
       "prefill": {}
     },

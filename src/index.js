@@ -185,20 +185,35 @@ const crawler = new PlaywrightCrawler({
   },
 });
 
-// Initial request
-const outboundLeg = normalizedInput.itinerary[0];
-const outboundInput = {
-  ...normalizedInput,
-  itinerary: [outboundLeg],
-  trip_type: "trip_type_one_way",
-};
-const outboundTfs = await serializeBase64Url(outboundInput);
-const outboundUrl = generatGoogleFlightsURL(outboundTfs, { type: "search" });
+// Price check mode: if all outbound segments have airline_code + flight_number,
+// skip search and go directly to the booking page.
+const outboundSegments = normalizedInput.itinerary[0]?.segments || [];
+const isPriceCheckMode = outboundSegments.length > 0 &&
+  outboundSegments.every((s) => s.airline_code && s.flight_number);
 
-await crawler.run([{
-  url: outboundUrl.toString(),
-  label: "SEARCH",
-  userData: { type: "OUTBOUND" },
-}]);
+if (isPriceCheckMode) {
+  const bookingTfs = await serializeBase64Url(normalizedInput);
+  const bookingUrl = generatGoogleFlightsURL(bookingTfs, { type: "booking" });
+  await crawler.run([{
+    url: bookingUrl.toString(),
+    label: "BOOKING",
+    userData: {},
+  }]);
+} else {
+  // Search mode: discover flights, then visit booking pages.
+  const outboundLeg = normalizedInput.itinerary[0];
+  const outboundInput = {
+    ...normalizedInput,
+    itinerary: [outboundLeg],
+    trip_type: "trip_type_one_way",
+  };
+  const outboundTfs = await serializeBase64Url(outboundInput);
+  const outboundUrl = generatGoogleFlightsURL(outboundTfs, { type: "search" });
+  await crawler.run([{
+    url: outboundUrl.toString(),
+    label: "SEARCH",
+    userData: { type: "OUTBOUND" },
+  }]);
+}
 
 await Actor.exit();

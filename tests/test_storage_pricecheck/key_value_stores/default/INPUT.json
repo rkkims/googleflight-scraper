@@ -1,0 +1,33 @@
+{
+  "origin": "YVR",
+  "destination": "SFO",
+  "departure_date": "2026-04-12",
+  "return_date": "2026-04-19",
+  "passengers": {
+    "adult": 1
+  },
+  "seat": "economy",
+  "only_direct_airline_booking": false,
+  "max_crawler_runtime_secs": 60,
+  "debug": false,
+  "fixed_flights": {
+    "outbound": [
+      {
+        "origin_airport": "YVR",
+        "destination_airport": "SFO",
+        "departure_date": "2026-04-12",
+        "airline_code": "UA",
+        "flight_number": "2322"
+      }
+    ],
+    "return": [
+      {
+        "origin_airport": "SFO",
+        "destination_airport": "YVR",
+        "departure_date": "2026-04-19",
+        "airline_code": "UA",
+        "flight_number": "2429"
+      }
+    ]
+  }
+}
