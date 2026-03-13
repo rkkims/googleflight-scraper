@@ -13,7 +13,7 @@ COPY package*.json ./
 COPY requirements.txt ./
 
 # Install Python dependencies from your requirements.txt file.
-RUN pip install -r requirements.txt
+RUN pip install --break-system-packages -r requirements.txt
 
 # Install Node.js dependencies. The --omit=dev flag skips development-only packages,
 # keeping the final image smaller and more secure.
