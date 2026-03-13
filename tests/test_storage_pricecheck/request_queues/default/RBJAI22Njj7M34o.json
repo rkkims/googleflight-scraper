@@ -1,9 +1,0 @@
-{
-	"id": "RBJAI22Njj7M34o",
-	"json": "{\"id\":\"RBJAI22Njj7M34o\",\"url\":\"https://www.google.com/travel/flights/booking?tfs=GjwSCjIwMjYtMDQtMTIiIAoDWVZSEgoyMDI2LTA0LTEyGgNTRk8qAlVBMgQyMzIyagUSA1lWUnIFEgNTRk8aPBIKMjAyNi0wNC0xOSIgCgNTRk8SCjIwMjYtMDQtMTkaA1lWUioCVUEyBDI0MjlqBRIDU0ZPcgUSA1lWUkIBAUgBmAEB&hl=en&gl=CA&curr=CAD\",\"loadedUrl\":\"https://www.google.com/travel/flights/booking?tfs=GjwSCjIwMjYtMDQtMTIiIAoDWVZSEgoyMDI2LTA0LTEyGgNTRk8qAlVBMgQyMzIyagUSA1lWUnIFEgNTRk8aPBIKMjAyNi0wNC0xOSIgCgNTRk8SCjIwMjYtMDQtMTkaA1lWUioCVUEyBDI0MjlqBRIDU0ZPcgUSA1lWUkIBAUgBmAEB&hl=en&gl=CA&curr=CAD\",\"uniqueKey\":\"https://www.google.com/travel/flights/booking?curr=CAD&gl=CA&hl=en&tfs=GjwSCjIwMjYtMDQtMTIiIAoDWVZSEgoyMDI2LTA0LTEyGgNTRk8qAlVBMgQyMzIyagUSA1lWUnIFEgNTRk8aPBIKMjAyNi0wNC0xOSIgCgNTRk8SCjIwMjYtMDQtMTkaA1lWUioCVUEyBDI0MjlqBRIDU0ZPcgUSA1lWUkIBAUgBmAEB\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"BOOKING\",\"__crawlee\":{\"state\":4}},\"handledAt\":\"2026-03-13T20:43:25.844Z\"}",
-	"method": "GET",
-	"orderNo": null,
-	"retryCount": 0,
-	"uniqueKey": "https://www.google.com/travel/flights/booking?curr=CAD&gl=CA&hl=en&tfs=GjwSCjIwMjYtMDQtMTIiIAoDWVZSEgoyMDI2LTA0LTEyGgNTRk8qAlVBMgQyMzIyagUSA1lWUnIFEgNTRk8aPBIKMjAyNi0wNC0xOSIgCgNTRk8SCjIwMjYtMDQtMTkaA1lWUioCVUEyBDI0MjlqBRIDU0ZPcgUSA1lWUkIBAUgBmAEB",
-	"url": "https://www.google.com/travel/flights/booking?tfs=GjwSCjIwMjYtMDQtMTIiIAoDWVZSEgoyMDI2LTA0LTEyGgNTRk8qAlVBMgQyMzIyagUSA1lWUnIFEgNTRk8aPBIKMjAyNi0wNC0xOSIgCgNTRk8SCjIwMjYtMDQtMTkaA1lWUioCVUEyBDI0MjlqBRIDU0ZPcgUSA1lWUkIBAUgBmAEB&hl=en&gl=CA&curr=CAD"
-}
