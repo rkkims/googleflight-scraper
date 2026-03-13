@@ -159,13 +159,13 @@ router.addHandler("BOOKING", async ({ page, request, log }) => {
     for (const button of buttons) {
       await button.scrollIntoViewIfNeeded();
       await button.click();
-      await page.waitForTimeout(1000);
+      await page.waitForSelector('div[jscontroller="GQaSVc"]', { timeout: 5000 }).catch(() => {});
     }
     const hideButtons = await page.$$('button:has(span:has-text("Hide options"))');
     for (const button of hideButtons) {
       await button.scrollIntoViewIfNeeded();
       await button.click();
-      await page.waitForTimeout(500);
+      await page.waitForSelector('button:has(span:has-text("Hide options"))', { state: 'hidden', timeout: 3000 }).catch(() => {});
     }
   } catch (err) {
     log.debug(`Error expanding details: ${err.message}`);
@@ -206,7 +206,7 @@ const crawler = new PlaywrightCrawler({
   requestHandler: router,
   headless: !debug,
   useSessionPool: true,
-  maxRequestRetries: 4,
+  maxRequestRetries: 2,
   maxConcurrency: 3,
   requestHandlerTimeoutSecs: max_crawler_runtime_secs + 30,
   browserPoolOptions: {
