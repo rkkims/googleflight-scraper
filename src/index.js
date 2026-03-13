@@ -59,7 +59,7 @@ router.addHandler("SEARCH", async ({ page, request, log, crawler }) => {
         };
         const returnInput = normalizeInput(returnSearchUserInput);
         const returnTfs = await serializeBase64Url(returnInput);
-        const returnUrl = await generatGoogleFlightsURL(returnTfs, { type: "search" });
+        const returnUrl = generatGoogleFlightsURL(returnTfs, { type: "search" });
 
         await crawler.addRequests([{
           url: returnUrl.toString(),
@@ -73,7 +73,7 @@ router.addHandler("SEARCH", async ({ page, request, log, crawler }) => {
           itinerary: [{ ...normalizedInput.itinerary[0], segments: flight.segments }],
         };
         const bookingTfs = await serializeBase64Url(bookingInput);
-        const bookingUrl = await generatGoogleFlightsURL(bookingTfs, { type: "booking" });
+        const bookingUrl = generatGoogleFlightsURL(bookingTfs, { type: "booking" });
 
         await crawler.addRequests([{
           url: bookingUrl.toString(),
@@ -99,7 +99,7 @@ router.addHandler("SEARCH", async ({ page, request, log, crawler }) => {
         trip_type: "trip_type_round",
       };
       const bookingTfs = await serializeBase64Url(bookingInput);
-      const bookingUrl = await generatGoogleFlightsURL(bookingTfs, { type: "booking" });
+      const bookingUrl = generatGoogleFlightsURL(bookingTfs, { type: "booking" });
 
       await crawler.addRequests([{
         url: bookingUrl.toString(),
@@ -193,7 +193,7 @@ const outboundInput = {
   trip_type: "trip_type_one_way",
 };
 const outboundTfs = await serializeBase64Url(outboundInput);
-const outboundUrl = await generatGoogleFlightsURL(outboundTfs, { type: "search" });
+const outboundUrl = generatGoogleFlightsURL(outboundTfs, { type: "search" });
 
 await crawler.run([{
   url: outboundUrl.toString(),

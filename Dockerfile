@@ -8,7 +8,7 @@ COPY package*.json ./
 # Install Node.js dependencies. The --omit=dev flag skips development-only packages,
 # keeping the final image smaller and more secure.
 RUN npm install --omit=dev
-RUN npx playwright install --with-deps
+RUN npx playwright install --with-deps chromium
 
 # Copy the rest of your project's source code into the container.
 COPY . .

@@ -5,7 +5,7 @@ import { URL } from "node:url";
  * @param {object} options
  * @returns {string}
  */
-export async function generatGoogleFlightsURL(tfsBase64Url, options = {}) {
+export function generatGoogleFlightsURL(tfsBase64Url, options = {}) {
   if (!tfsBase64Url) throw new Error("Missing tfs base64 payload.");
 
   const {
