@@ -1,39 +1,9 @@
 import { Actor } from "apify";
-import { PlaywrightCrawler, createPlaywrightRouter, RequestQueue } from "crawlee";
-import { spawn } from "child_process";
-import fs from "fs";
+import { PlaywrightCrawler, createPlaywrightRouter } from "crawlee";
 import { parseBookingFlights, parseSearchFlights } from "./parser.js";
 import { generatGoogleFlightsURL } from "./url_generator.js";
-
-/**
- * Spawns a Python process to handle data transformation.
- */
-function runPythonScript(scriptPath, inputData) {
-  return new Promise((resolve, reject) => {
-    const pythonExecutable = fs.existsSync("./.venv/bin/python3")
-      ? "./.venv/bin/python3"
-      : "python3";
-
-    const pythonProcess = spawn(pythonExecutable, [scriptPath]);
-    let stdout = "";
-    let stderr = "";
-
-    pythonProcess.stdout.on("data", (data) => (stdout += data.toString()));
-    pythonProcess.stderr.on("data", (data) => (stderr += data.toString()));
-
-    pythonProcess.on("close", (code) => {
-      if (code !== 0) {
-        return reject(
-          new Error(`Python script ${scriptPath} exited with code ${code}: ${stderr}`)
-        );
-      }
-      resolve(stdout.trim());
-    });
-
-    pythonProcess.stdin.write(JSON.stringify(inputData));
-    pythonProcess.stdin.end();
-  });
-}
+import { normalizeInput } from "./input_normalizer/input_normalize.js";
+import { serializeBase64Url } from "./serializer/flight_serializer.js";
 
 await Actor.init();
 
@@ -49,11 +19,7 @@ const {
 } = rawInput;
 
 // 1️⃣ Normalize the initial user input
-const normalizedInputJson = await runPythonScript(
-  "src/input_normalizer/input_normalize.py",
-  userInput
-);
-const normalizedInput = JSON.parse(normalizedInputJson);
+const normalizedInput = normalizeInput(userInput);
 
 const router = createPlaywrightRouter();
 
@@ -114,15 +80,8 @@ router.addHandler("SEARCH", async ({ page, request, log, crawler }) => {
           ...userInput,
           fixed_flights: { outbound: flight.segments },
         };
-        const returnNormalizedJson = await runPythonScript(
-          "src/input_normalizer/input_normalize.py",
-          returnSearchUserInput
-        );
-        const returnInput = JSON.parse(returnNormalizedJson);
-        const returnTfs = await runPythonScript(
-          "src/serializer/flight_serializer.py",
-          returnInput
-        );
+        const returnInput = normalizeInput(returnSearchUserInput);
+        const returnTfs = await serializeBase64Url(returnInput);
         const returnUrl = await generatGoogleFlightsURL(returnTfs, { type: "search" });
 
         await crawler.addRequests([{
@@ -136,10 +95,7 @@ router.addHandler("SEARCH", async ({ page, request, log, crawler }) => {
           ...normalizedInput,
           itinerary: [{ ...normalizedInput.itinerary[0], segments: flight.segments }],
         };
-        const bookingTfs = await runPythonScript(
-          "src/serializer/flight_serializer.py",
-          bookingInput
-        );
+        const bookingTfs = await serializeBase64Url(bookingInput);
         const bookingUrl = await generatGoogleFlightsURL(bookingTfs, { type: "booking" });
 
         await crawler.addRequests([{
@@ -165,10 +121,7 @@ router.addHandler("SEARCH", async ({ page, request, log, crawler }) => {
         ],
         trip_type: "trip_type_round",
       };
-      const bookingTfs = await runPythonScript(
-        "src/serializer/flight_serializer.py",
-        bookingInput
-      );
+      const bookingTfs = await serializeBase64Url(bookingInput);
       const bookingUrl = await generatGoogleFlightsURL(bookingTfs, { type: "booking" });
 
       await crawler.addRequests([{
@@ -254,7 +207,7 @@ const crawler = new PlaywrightCrawler({
   headless: !debug,
   useSessionPool: true,
   maxRequestRetries: 4,
-  maxConcurrency: 10,
+  maxConcurrency: 3,
   requestHandlerTimeoutSecs: max_crawler_runtime_secs + 30,
   browserPoolOptions: {
     useFingerprints: true,
@@ -275,10 +228,7 @@ const outboundInput = {
   itinerary: [outboundLeg],
   trip_type: "trip_type_one_way",
 };
-const outboundTfs = await runPythonScript(
-  "src/serializer/flight_serializer.py",
-  outboundInput
-);
+const outboundTfs = await serializeBase64Url(outboundInput);
 const outboundUrl = await generatGoogleFlightsURL(outboundTfs, { type: "search" });
 
 await crawler.run([{

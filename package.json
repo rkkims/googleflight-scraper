@@ -19,7 +19,8 @@
     "apify": "^3.5.1",
     "cheerio": "^1.1.2",
     "crawlee": "^3.15.2",
-    "playwright": "^1.56.1"
+    "playwright": "^1.56.1",
+    "protobufjs": "^7.4.0"
   },
   "devDependencies": {
     "@types/node": "^24.10.0"
