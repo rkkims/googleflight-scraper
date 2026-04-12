@@ -1,8 +1,8 @@
 {
   "origin": "YVR",
   "destination": "SFO",
-  "departure_date": "2026-05-11",
-  "return_date": "2026-05-18",
+  "departure_date": "2026-05-12",
+  "return_date": "2026-05-19",
   "passengers": {
     "adult": 1
   },
