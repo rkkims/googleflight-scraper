@@ -1,15 +1,49 @@
 {
   "origin": "YVR",
-  "destination": "SFO",
-  "departure_date": "2026-05-13",
-  "return_date": "2026-05-20",
+  "destination": "NRT",
+  "departure_date": "2026-04-12",
+  "return_date": "2026-04-19",
   "passengers": {
     "adult": 1
   },
   "seat": "economy",
-  "only_direct_airline_booking": true,
+  "only_direct_airline_booking": false,
   "max_outbound_flight_limit": 3,
   "max_return_flight_limit": 3,
   "max_crawler_runtime_secs": 60,
-  "debug": false
+  "debug": false,
+  "fixed_flights": {
+    "outbound": [
+      {
+        "origin_airport": "YVR",
+        "destination_airport": "YYC",
+        "departure_date": "2026-04-12",
+        "airline_code": "WS",
+        "flight_number": "104"
+      },
+      {
+        "origin_airport": "YYC",
+        "destination_airport": "NRT",
+        "departure_date": "2026-04-12",
+        "airline_code": "WS",
+        "flight_number": "80"
+      }
+    ],
+    "return": [
+      {
+        "origin_airport": "NRT",
+        "destination_airport": "YYC",
+        "departure_date": "2026-04-19",
+        "airline_code": "WS",
+        "flight_number": "81"
+      },
+      {
+        "origin_airport": "YYC",
+        "destination_airport": "YVR",
+        "departure_date": "2026-04-19",
+        "airline_code": "WS",
+        "flight_number": "117"
+      }
+    ]
+  }
 }

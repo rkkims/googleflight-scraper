@@ -57,23 +57,18 @@ If you keep the booking page step, add a price filter on the search page: only f
 - **#2** Replace Python with `protobufjs` — done
 - **#3** Reduce memory to 2048 MB — done
 - **#4** Reduce `maxConcurrency` to 3 — done
+- **#5** Remove dead Python files — done
+- **#6** Replace `waitForTimeout` with `waitForSelector` — done
+- **#7** Reduce `maxRequestRetries` to 2 — done
+- **#8** Add `.dockerignore` — done
+- **#9** Replace manual XHR listeners with `page.waitForResponse()` — done
+- **#10** Install only Chromium in Dockerfile — done
+- **#11** Price check mode — done (skip search entirely for known flights; 1 page load vs. 13)
 
-## Best Combined Strategy
+## Verdict on Original Strategy
 
-**#1 + #3**: skip booking pages by parsing search prices, and reduce memory to 2048 MB. Together these could cut cost by 70–80% per run.
+Original advice #1 (skip booking pages by parsing search prices) was **superseded** by the price check mode idea. Skipping booking pages would have broken the per-agent breakdown (direct airline vs. third-party), which is the core value of the actor. Instead, price check mode achieves the same page-load reduction (1 vs. 13) for users who already know their specific flights, while preserving full booking option data.
 
----
+## Status
 
-## Additional Optimizations (identified post-implementation)
-
-### 5. Remove dead Python files
-Python is gone from the Dockerfile but these files are still `COPY .`'d into the image:
-- `src/input_normalizer/input_normalize.py`
-- `src/serializer/flight_serializer.py`, `flights_pb2.py`, `__init__.py`
-- `requirements.txt`, `build_proto.sh`, `apify.json.deprecated`
-
-### 6. Replace fixed `waitForTimeout` in booking handler
-`waitForTimeout(1000)` per "Flight details" click + `waitForTimeout(500)` per "Hide options" click adds up to 27–40 seconds of blind sleeping per run across all booking pages. Replace with `waitForSelector` to wait only as long as needed.
-
-### 7. Reduce `maxRequestRetries` from 4 to 2
-4 retries means one bad request can cost 5× the proxy and compute budget. Google Flights is stable — 2 retries is sufficient.
+All meaningful optimizations have been applied. No further cost reduction changes are identified.

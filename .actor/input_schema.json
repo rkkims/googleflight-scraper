@@ -73,6 +73,13 @@
       ],
       "default": "economy"
     },
+    "currency": {
+      "title": "Currency",
+      "type": "string",
+      "description": "ISO 4217 currency code for displayed prices (e.g. 'USD', 'EUR', 'GBP'). Defaults to USD.",
+      "editor": "textfield",
+      "default": "USD"
+    },
     "fixed_flights": {
       "title": "Fixed Flights",
       "type": "object",

@@ -8,7 +8,8 @@
   },
   "scripts": {
     "start": "node src/index.js",
-    "test": "node tests/run_test.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --forceExit",
+    "test:e2e": "node tests/run_test.js",
     "update-dates": "node scripts/update_dates.js"
   },
   "keywords": [],
@@ -19,10 +20,12 @@
     "apify": "^3.5.1",
     "cheerio": "^1.1.2",
     "crawlee": "^3.15.2",
+    "express": "^5.2.1",
     "playwright": "^1.56.1",
     "protobufjs": "^7.4.0"
   },
   "devDependencies": {
-    "@types/node": "^24.10.0"
+    "@types/node": "^24.10.0",
+    "jest": "^30.3.0"
   }
 }
