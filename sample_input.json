@@ -1,8 +1,8 @@
 {
   "origin": "YVR",
   "destination": "NRT",
-  "departure_date": "2026-05-30",
-  "return_date": "2026-06-06",
+  "departure_date": "2026-05-31",
+  "return_date": "2026-06-07",
   "passengers": {
     "adult": 1
   },
