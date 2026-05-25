@@ -23,14 +23,14 @@
       "type": "string",
       "description": "The departure date. Accepts YYYY-MM-DD, YYYY/MM/DD, or MM/DD/YYYY.",
       "editor": "textfield",
-      "prefill": "2026-06-23"
+      "prefill": "2026-06-24"
     },
     "return_date": {
       "title": "Return Date",
       "type": "string",
       "description": "The return date for a round trip. Leave empty for a one-way trip.",
       "editor": "textfield",
-      "prefill": "2026-06-30"
+      "prefill": "2026-07-01"
     },
     "passengers": {
       "title": "Passengers",
