@@ -14,7 +14,7 @@ To perform a flight search, you provide a JSON object with your travel details. 
 {
   "origin": "YVR",
   "destination": "NRT",
-  "departure_date": "2026-08-10"
+  "departure_date": "2026-08-11"
 }
 ```
 
@@ -49,7 +49,7 @@ The system accepts dates as strings in the following formats:
 {
   "origin": "YVR",
   "destination": "NRT",
-  "departure_date": "2026-08-10"
+  "departure_date": "2026-08-11"
 }
 ```
 
@@ -59,8 +59,8 @@ The system accepts dates as strings in the following formats:
 {
   "origin": "YVR",
   "destination": "NRT",
-  "departure_date": "2026-08-10",
-  "return_date": "2026-08-17"
+  "departure_date": "2026-08-11",
+  "return_date": "2026-08-18"
 }
 ```
 
@@ -93,8 +93,8 @@ The `passengers` object has the following structure:
 {
   "origin": "YVR",
   "destination": "NRT",
-  "departure_date": "2026-08-10",
-  "return_date": "2026-08-17",
+  "departure_date": "2026-08-11",
+  "return_date": "2026-08-18",
   "passengers": {
     "adult": 2,
     "child": 1
@@ -144,21 +144,21 @@ In this example, the user wants to fly from YVR to NRT via HKG on the way out, a
 {
   "origin": "YVR",
   "destination": "NRT",
-  "departure_date": "2026-08-10",
-  "return_date": "2026-08-17",
+  "departure_date": "2026-08-11",
+  "return_date": "2026-08-18",
   "fixed_flights": {
     "outbound": [
       {
         "origin_airport": "YVR",
         "destination_airport": "HKG",
-        "date": "2026-08-10",
+        "date": "2026-08-11",
         "airline_code": "HX",
         "flight_number": "81"
       },
       {
         "origin_airport": "HKG",
         "destination_airport": "NRT",
-        "date": "2026-08-10",
+        "date": "2026-08-11",
         "airline_code": "HX",
         "flight_number": "604"
       }
