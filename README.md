@@ -1,6 +1,28 @@
 # Google Flights Scraper
 
-This Apify actor scrapes flight information from Google Flights. It can be used to search for one-way and round-trip flights, and retrieve booking details including prices, layovers, and carrier information.
+An Apify actor that extracts one-way and round-trip flight data from Google Flights —
+prices, layovers, carriers, and booking details — from a source with no public API.
+
+## Why this is non-trivial
+
+Google Flights encodes its search state as **base64-wrapped protobuf** in the URL, and
+returns results in a deeply nested, positionally-indexed array rather than named fields.
+There is no schema to code against, and both sides change without notice.
+
+The design that makes it maintainable:
+
+| Concern | Module | Approach |
+|---|---|---|
+| Request construction | `src/url_generator.js`, `src/serializer/` | `.proto` definitions (`flights.proto`) compile the search into the protobuf payload the frontend sends, rather than string-templating a URL |
+| Input tolerance | `src/input_normalizer/` | Accepts three date formats, infers trip type from the presence of a return date, normalizes IATA codes |
+| Response parsing | `src/parser.js` | Positional extraction isolated behind one module, so an upstream layout change is a single-file fix |
+| Regression safety | `src/*.test.js` | Parsers unit-tested against **captured response fixtures** — an upstream shape change fails in CI, not silently in production at 3am |
+| Freshness | `.github/workflows/update_dates.yml` | Scheduled job rolls test dates forward so the fixture suite never expires |
+| Deployment | `Dockerfile`, `.actor/` | Containerized with a declared input/output schema |
+
+The pattern worth stealing is the fourth row: when you are parsing an undocumented,
+unstable structure, **the fixtures are the contract**. Pin real captured responses,
+assert against them, and let CI tell you the day the upstream moves.
 
 ---
 
